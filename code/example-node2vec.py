@@ -48,10 +48,10 @@ def main():
                          max_iter=150)
         return acc
 
-    for epoch in range(1, 21):
-        loss = train()
-        acc = test()
-        print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}, Acc: {acc:.4f}')
+#   for epoch in range(1, 21):
+#       loss = train()
+#       acc = test()
+#       print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}, Acc: {acc:.4f}')
 
 #   @torch.no_grad()
 #   def plot_points(colors):
