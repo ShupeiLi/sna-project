@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from node2vec import BaseModel
+import torch
 import numpy as np
 from torch_geometric.datasets import Entities
 from sklearn.linear_model import LogisticRegression
@@ -37,7 +38,9 @@ class Entities(BaseModel):
         self.preprocessing(lr, embedding_dim, walk_length, context_size, walks_per_node, 
                 num_negative_samples, p, q, sparse, batch_size)
 
+    @torch.no_grad()
     def test(self):
+        self.model.eval()
         z = self.model()
         clf = LogisticRegression()
         clf.fit(z[self.data.train_idx].detach().cpu().numpy(), self.data.train_y.detach().cpu().numpy())
