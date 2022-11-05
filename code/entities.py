@@ -8,13 +8,13 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, recall_score, f1_score
 
 
-aifb_data = Entities(root = "../data/Entities/AIFB/", name="AIFB")
+aifb_data = Entities(root="../data/Entities/AIFB/", name="AIFB")
 aifb_data = aifb_data[0]
-#am_data = Entities(root = "../data/Entities/AM/", name="AM")
+#am_data = Entities(root="../data/Entities/AM/", name="AM")
 #am_data = am_data[0]
-#mutag_data = Entities(root = "../data/Entities/MUTAG/", name="MUTAG")
+#mutag_data = Entities(root="../data/Entities/MUTAG/", name="MUTAG")
 #mutag_data = mutag_data[0]
-#bgs_data = Entities(root = "../data/Entities/BGS/", name="BGS")
+#bgs_data = Entities(root="../data/Entities/BGS/", name="BGS")
 #bgs_data = bgs_data[0]
 
 
@@ -35,7 +35,7 @@ class Entities(BaseModel):
         self.data = data
         self.multi = multi
         self.epochs = epochs
-        self.preprocessing(lr, embedding_dim, walk_length, context_size, walks_per_node, 
+        self.preprocessing(data.num_nodes, lr, embedding_dim, walk_length, context_size, walks_per_node, 
                 num_negative_samples, p, q, sparse, batch_size)
 
     @torch.no_grad()
