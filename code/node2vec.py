@@ -47,11 +47,16 @@ class BaseModel(abc.ABC):
             self.optimizer.step()
             total_loss += loss.item()
         return total_loss / len(self.loader)
+    @abc.abstractmethod
+    def down_stream_train(self):
+        """
+        train down stream model performance.
+        """
 
     @abc.abstractmethod
     def test(self):
         """
-        Evaluate model performance.
+        test down stream model performance.
         """
 
     @cal_time
@@ -59,6 +64,7 @@ class BaseModel(abc.ABC):
         if not hasattr(self, "epochs"):
             raise AttributeError(f"Class attribute 'epochs' is not defined.")
         for epoch in range(1, self.epochs + 1):
-            loss = self.train()
-            acc, recall, f1 = self.test()
-            print(f"Epoch: {epoch:02d}, Train Loss: {loss:.4f}, Test Acc: {acc:.4f}, Test Recall: {recall:.4f}, Test F1: {f1:.4f}.")
+            self.train()
+        self.down_stream_train()
+        acc, recall, f1 = self.test()
+        print(f"Test Acc: {acc:.4f}, Test Recall: {recall:.4f}, Test F1: {f1:.4f}.")
