@@ -13,19 +13,17 @@
 \begin{document}
 
 \title{Your Original and Relevant Course Project Title}
-\subtitle{ Social Network Analysis for Computer Scientists --- Course paper} % do not modify thi
+\subtitle{ Social Network Analysis for Computer Scientists --- Course paper} % do not modify this
 
-\author{Student name 1}
-%\orcid{0000-0001-5468-1030}
-\email{student2@umail.leidenuniv.nl}
+\author{Chenyu Shi}
+\email{s3500063@umail.leidenuniv.nl}
 \affiliation{
   \institution{LIACS, Leiden University}
   \city{Leiden}
   \country{Netherlands}}
 
-\author{Student name 2}
-%\orcid{0000-0001-5468-1030}
-\email{student2@umail.leidenuniv.nl}
+\author{Shupei Li}
+\email{s3430863@umail.leidenuniv.nl}
 \affiliation{
   \institution{LIACS, Leiden University}
   \city{Leiden}  
@@ -33,7 +31,7 @@
 
 \renewcommand{\shortauthors}{Lastname1 and Lastname2}
 
-\keywords{keyword1, keyword2, keyword3, social network analysis, network science}
+\keywords{node2vec, GCN, graph embeddings, social network analysis, network science}
 
 \begin{abstract}
 
@@ -44,8 +42,14 @@
 \maketitle
 
 \section{Introduction}
-
 % textual description of the context, the problem considered, why it is important, how it is addressed in other works, and what real-world applications are. end with a paragraph on what the contributions of the paper are (so, which problems you solve or which research questions you address), and finally a paragraph on how the remainder of the paper is organized.
+Graphs are mathematical objects that can model complex relationships on non-Eucildean space. They are widely used in multiple domains such as molecular structure modelling, social network analysis, recommender systems, etc. To leverage the information contained in graphs, it is essential to develop efficient techniques for representing graph-structured data numerically.\par
+Traditional statistical and machine learning methods are desiged for extracting features from structured data on Eucildean space. For example, principal component analysis(PCA), uniform manifold approximation and projection (UMAP), and t-distributed stochastic neighbor embedding (T-SNE) are common techniques to reduce dimensions and capture features of data. Although these methods have achieved satisfactory performance on structured-data, they are hard to be generalized to graph-structured data, because they highly depend on properties of Eucildean space.\par
+This challenge led to the development of techniques specifically for graph-based representation. There are two main types of these techniques: shallow embedding method and deep embedding method \cite{murphy2022}. Shallow embedding methods use shallow encoder functions to map the original graph structure onto a Euclidean space and obtain the embedding matrix. If data is labelled, we can apply supervised learning algorithms, e.g. label propagation, to extract embeddings later used in a supervised task. However, labels are not available or only partly available in most cases, where we need unsupervised learning or semi-supervised learning to distill information about graph structure. These methods can be divided into distance-based method and outer product method further \cite{murphy2022}. Generally, distance-based methods select a metric function that indicates distances between any pairs of nodes and optimize the function to generate embeddings. Representative distance-based methods include multi-dimensional scaling and laplacian eigenmaps. Outer product-based methods use matrix operations to evaluate the similarity between nodes. Most of early studies in graph embedding field adopt matrix factorization to reduce dimensionality of data while preserve the structure information \cite{cai2018}. Another mainstream outer product-based method is inspired by the development in natural language processing. Existing research generalizes the skip-gram word embedding framework to capture the graph embeddings, which has been proved to be efficient on many graph related tasks \cite{deepwalk}\cite{line}. Node2vec \cite{node2vec}, one of algorithms addressed in this paper, is also a variation of skip-gram-based method.\par
+Node2vec is a semi-supervised algorithm whose goal is learning features from networks \cite{node2vec}. It transforms the graph embedding learning into a maximum likelihood optimization problem in a similar way to skip-gram architecture of word embedding learning. Likelihood calculation requires a clear definition of the neighborhood. Textual data has the intrinsic semantic order that can be naturally employed as word neighborhoods. However, graph-structured data has no explicit neighborhoods. Node2vec introduces the idea of the second-order random walk into graph neighborhood sampling strategy. The emphasis of node2vec model is easy to switch between breadth-first sampling (BFS) and depth-first sampling (DFS) by adjusting hyperparameters. Moreover, its computational complexity is less than classical BFS and DFS strategies. Because of its efficiency and great performance on graph embedding learning task, node2vec is an ideal choice among shallow embedding methods.\par
+In recent years, a lot of studies have focused more on deep embedding method rather than the shallow one. Deep embedding method usually refers to algorithms that learn graph features via graph neural networks (GNN). The GNN is a class of artificial neural networks constructed for graph-structured data. Inspired by the success of convolutional neural networks (CNN) on grid data, many GNN architectures have been proposed to generalize the convolution operation on graphs. In this paper, we mainly focus on a method called graph convolutional networks (GCN) \cite{gcn}. GCNs defines the graph convolution based on the graph Laplacian spectrum. It has achieved state-of-the-art performance on common graph related tasks, such as node classification, link prediction, etc.\par
+We propose a novel method to extract embeddings from graphs in this paper. Our method is based on node2vec and GCNs. Motivated by the concept of meta learning, we regard the embeddings returned by node2vec as the meta information for GCNs. This prior knowledge helps to improve the quality of final graph embeddings, and therefore enhances the model performance in various tasks.\par
+The rest of the paper is organized as follows. Section 2 reviews related works on graph embedding learning methods. We illustrate necessary notations, formula, and assumptions in Section 3. And then we describe approaches in detail in Section 4. Section 5 is an introduction to five open source data sets we use in the project. After that, we present our experimental set-up and results in Section 6. The paper ends with a conclusion section.  
 
 \section{Related work}
 
