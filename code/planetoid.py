@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from node2vec import BaseModel
+from base import *
 import torch
 import numpy as np
 from torch_geometric.datasets import Planetoid
@@ -21,25 +21,27 @@ class PubMed(BaseModel):
         data: Graph data.
         num_nodes: Number of nodes in the graph.
         lr: Learning rate of optimizer. Default: 0.001.
-        epochs: The number of epochs of training. Default: 50.
+        node2vec_epoch: The number of epochs of training node2vec model. Default: 50.
         batch_size: The size of a single batch. Default: 128.
         Refer to https://pytorch-geometric.readthedocs.io/en/latest/_modules/torch_geometric/nn/models/node2vec.html#Node2Vec
         for other parameters.
     """
-    def __init__(self, data, num_nodes, lr=0.001, epochs=50, embedding_dim=128, walk_length=20, context_size=10,
+    def __init__(self, data, num_nodes, lr=0.001, node2vec_epoch=50, embedding_dim=128, walk_length=20, context_size=10,
             walks_per_node=10, num_negative_samples=1, p=1, q=1, sparse=True, batch_size=128):
+        self.use_node2vec = True
         self.data = data
-        self.epochs = epochs
+        self.node2vec_epoch = node2vec_epoch
         self.preprocessing(num_nodes, lr, embedding_dim, walk_length, context_size, walks_per_node, 
                 num_negative_samples, p, q, sparse, batch_size)
 
+    def train(self):
+        self.model.eval()
+        self.clf = LogisticRegression()
+        self.clf.fit(self.model()[self.data.train_mask].detach().cpu().numpy(), self.data.y[self.data.train_mask].detach().cpu().numpy())
+
     @torch.no_grad()
     def test(self):
-        self.model.eval()
-        z = self.model()
-        clf = LogisticRegression()
-        clf.fit(z[self.data.train_mask].detach().cpu().numpy(), self.data.y[self.data.train_mask].detach().cpu().numpy())
-        y_pred = clf.predict(z[self.data.test_mask].detach().cpu().numpy())
+        y_pred = self.clf.predict(self.model()[self.data.test_mask].detach().cpu().numpy())
         y_true = self.data.y[self.data.test_mask].detach().cpu().numpy()
         acc = accuracy_score(y_true, y_pred)
         recall = recall_score(y_true, y_pred, labels=np.unique(y_true), average="weighted")
@@ -48,5 +50,5 @@ class PubMed(BaseModel):
 
 
 if __name__ == "__main__":
-    pubmed_model = PubMed(pubmed_data, node_arr.shape[0], epochs=5)
+    pubmed_model = PubMed(pubmed_data, node_arr.shape[0], node2vec_epoch=5)
     pubmed_model.main()
