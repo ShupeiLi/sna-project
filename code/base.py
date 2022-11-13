@@ -2,6 +2,7 @@
 
 import abc
 import sys
+import os
 from functools import wraps
 from time import time
 from tqdm import tqdm
@@ -44,6 +45,15 @@ class BaseModel(abc.ABC):
             loss.backward()
             self.optimizer.step()
 
+    def node2vec_save(self):
+        if self.model_path != "":
+            print("Training node2vec model...")
+            for epoch in tqdm(range(self.node2vec_epoch)):
+                self.node2vec_train()
+            torch.save(self.model, self.model_path)
+        else:
+            print("Save model failed. The path is invalid.")
+
     @abc.abstractmethod
     def train(self):
         """
@@ -59,9 +69,12 @@ class BaseModel(abc.ABC):
     @cal_time
     def main(self):
         if self.use_node2vec == True:
-            print("Training node2vec model...")
-            for epoch in tqdm(range(self.node2vec_epoch)):
-                self.node2vec_train()
+            if os.path.exists(self.model_path):
+                self.model = torch.load(self.model_path)
+            else:
+                print("Training node2vec model...")
+                for epoch in tqdm(range(self.node2vec_epoch)):
+                    self.node2vec_train()
         print("Training model for the task...")
         self.train()
         print("Evaluating model...")
@@ -73,12 +86,22 @@ class GCN(nn.Module):
     def __init__(self, node_number, embedding_dim, meta_info, proposed):
         super(GCN, self).__init__()
         self.embedding = torch.nn.Embedding(num_embeddings=node_number, embedding_dim=embedding_dim)
-        self.gcn = GCNConv(in_channels=embedding_dim, out_channels=embedding_dim)
+        self.gcn1 = GCNConv(in_channels=embedding_dim, out_channels=64)
+        self.gcn2 = GCNConv(in_channels=64, out_channels=32)
+        self.gcn3 = GCNConv(in_channels=32, out_channels=16)
+        self.drop1 = torch.nn.Dropout()
+        self.drop2 = torch.nn.Dropout(p=0.1)
         if proposed == True:
             self.embedding.from_pretrained(meta_info, freeze=False)
     
     def forward(self, nodes, edges):
         nodes_embedding = self.embedding(nodes)
-        nodes_embedding = self.gcn(nodes_embedding,edges)
+        nodes_embedding = self.gcn1(nodes_embedding, edges)
+        nodes_embedding = torch.relu(nodes_embedding)
+        nodes_embedding = self.drop1(nodes_embedding)
+        nodes_embedding = self.gcn2(nodes_embedding, edges)
+        nodes_embedding = torch.relu(nodes_embedding)
+        nodes_embedding = self.drop2(nodes_embedding)
+        nodes_embedding = self.gcn3(nodes_embedding, edges)
         nodes_embedding = torch.relu(nodes_embedding)
         return nodes_embedding
