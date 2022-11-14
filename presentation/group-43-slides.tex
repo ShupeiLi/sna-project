@@ -430,21 +430,136 @@ an already visited node.
     \frametitle{Combine node2vec and GNN}
     node2vec can produce embeddings for each node with graph information.\par ~\\
     GNN lacks a good general method to initialize its input nodes’ embeddings.\par ~\\
-    We can use node2vec to produce initial input nodes’ embedding for GNN to improve training process of GNN and obtain better performance.\par ~\\
+    We can use node2vec to produce initial input nodes’ embeddings for GNN to improve training process of GNN and obtain better performance.\par ~\\
     It’s a general method because there is no specific requirement of graphs when applying node2vec and GNN.
 \end{frame}
 
 \begin{frame}
     \frametitle{Proposed Method}
+    \begin{columns}
+        \begin{column}{0.7\textwidth}
+            node2vec + GNN
+            \begin{itemize}
+                \item Inspired by the concept of meta learning.
+                \item An improved version of GNN.
+                \item Choose the graph convolutional network (GCN) in our experiments.
+                    \begin{itemize}
+                        \item[$\circ$] GCN iteration formula:
+                            \begin{align*}
+                                h^{(k)} = \sigma (\hat{D}^{-\frac{1}{2}}\hat{A}\hat{D}^{-\frac{1}{2}}h^{(k-1)}W^{(k)})
+                            \end{align*}
+                            with $\hat{A} = A + I$, where $A$ is the adjacency matrix and $\hat{D}$ is the diagonal node degree matrix of $\hat{A}$.
+            \end{itemize}
+    \end{itemize}
+        \end{column}
+        \begin{column}{0.3\textwidth}
+           \begin{center}
+               \includegraphics[height=6.5cm]{./graphics/proposed-model.png}
+           \end{center} 
+        \end{column}
+    \end{columns}
 \end{frame}
 
 \begin{frame}
     \frametitle{Preliminary Results}
+    \begin{itemize}
+        \item Node classification: Given a fraction of nodes and their classes, predict the classes of the remaining nodes.
+        \item Data\par~\\
+            \begin{tabular}{llll}
+                \toprule
+                \textbf{Dataset} & \textbf{Nodes} & \textbf{Edges} & \textbf{Classes}\\
+                \midrule
+                AIFB & 8,285 & 58,086 & 4\\
+                MUTAG & 23,644 & 148,454 & 2\\
+                PubMed & 19,717 & 88,648 & 3\\
+                \bottomrule
+            \end{tabular}
+            \par~\\
+        \item Metrics: Accuracy, recall, and weighted F1 score.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Preliminary Results}
+    \begin{itemize}
+        \item Results: AIFB \par~\\
+            \begin{tabular}{llll}
+                \toprule
+                \textbf{Algorithm} & \textbf{acc} & \textbf{recall} & \textbf{F1}\\
+                \midrule
+                node2vec & 0.9444 & 0.9444 & 0.9421\\
+                GCN & 0.9444 & 0.9444 & 0.9473\\
+                Proposed & \textbf{0.9722} & \textbf{0.9722} & \textbf{0.9737}\\
+                \bottomrule
+            \end{tabular}
+    \end{itemize}
+    \begin{columns}
+        \begin{column}{0.5\textwidth}
+            \includegraphics[width=\textwidth]{./graphics/loss-4.png}
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \includegraphics[width=\textwidth]{./graphics/f1-4.png}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Preliminary Results}
+    \begin{itemize}
+        \item Results: MUTAG \par~\\
+            \begin{tabular}{llll}
+                \toprule
+                \textbf{Algorithm} & \textbf{acc} & \textbf{recall} & \textbf{F1}\\
+                \midrule
+                node2vec & \textbf{0.7941} & 0.5652 & 0.6500\\
+                GCN & 0.7206 & 0.7206 & 0.7024\\
+                Proposed & 0.7353 & \textbf{0.7353} & \textbf{0.7322}\\
+                \bottomrule
+            \end{tabular}
+    \end{itemize}
+    \begin{columns}
+        \begin{column}{0.5\textwidth}
+            \includegraphics[width=\textwidth]{./graphics/loss.png}
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \includegraphics[width=\textwidth]{./graphics/f1.png}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Preliminary Results}
+    \begin{itemize}
+        \item Results: PubMed \par~\\
+            \begin{tabular}{llll}
+                \toprule
+                \textbf{Algorithm} & \textbf{acc} & \textbf{recall} & \textbf{F1}\\
+                \midrule
+                node2vec &  &  & \\
+                GCN &  &  & \\
+                Proposed &  &  & \\
+                \bottomrule
+            \end{tabular}
+    \end{itemize}
+    \begin{columns}
+        \begin{column}{0.5\textwidth}
+        \end{column}
+        \begin{column}{0.5\textwidth}
+        \end{column}
+    \end{columns}
 \end{frame}
 
 \section{Future work}
 \begin{frame}
     \frametitle{Future work} 
+    \begin{enumerate}
+        \item Apply node2vec, GCN, and our proposed model to link prediction.
+        \item Try different strategies of hyperparameter tuning.
+    \end{enumerate}
+    \vspace{1.5cm}
+    \begin{center}
+        \LARGE Thanks!
+    \end{center}
 \end{frame}
 
 \end{document}
