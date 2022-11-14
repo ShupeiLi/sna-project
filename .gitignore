@@ -1,6 +1,12 @@
 ## data sets
 data/*
 
+## Results
+results/*
+
+## Tools
+tools.py
+
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
