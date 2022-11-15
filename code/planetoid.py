@@ -62,8 +62,6 @@ class PubMed(BaseModel):
             y_pred = self.clf.predict(self.model()[self.data.val_mask].detach().cpu().numpy())
             y_true = self.data.y[self.data.val_mask].detach().cpu().numpy()
             acc = accuracy_score(y_true, y_pred)
-            recall = recall_score(y_true, y_pred, labels=np.unique(y_true), average="weighted")
-            f1 = f1_score(y_true, y_pred, labels=np.unique(y_true), average="weighted")
             tune.report(mean_accuracy=acc)
 
         search_space = {
@@ -96,7 +94,7 @@ class PubMed(BaseModel):
         return acc, recall, f1
 
 
-#if __name__ == "__main__":
-#    pubmed_model = PubMed(pubmed_data, node_arr.shape[0], node2vec_epoch=5)
-#    pubmed_model.tuning()
+if __name__ == "__main__":
+    pubmed_model = PubMed(pubmed_data, node_arr.shape[0], node2vec_epoch=5)
+    pubmed_model.tuning()
 #   pubmed_model.main()
