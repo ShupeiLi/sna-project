@@ -444,43 +444,11 @@ an already visited node.
     \end{columns}
 \end{frame}
 
-\begin{frame}
-    \frametitle{Preliminary Results}
-    \begin{itemize}
-        \item Node classification: Given a fraction of nodes and their classes, predict the classes of the remaining nodes.
-        \item Data\par~\\
-            \begin{tabular}{llll}
-                \toprule
-                \textbf{Dataset} & \textbf{Nodes} & \textbf{Edges} & \textbf{Classes}\\
-                \midrule
-                AIFB & 8,285 & 58,086 & 4\\
-                MUTAG & 23,644 & 148,454 & 2\\
-                PubMed & 19,717 & 88,648 & 3\\
-                \bottomrule
-            \end{tabular}
-            \par~\\
-        \item Metrics: Accuracy, recall, and weighted F1 score.
-    \end{itemize}
-\end{frame}
-
-\begin{frame}
-    \frametitle{Preliminary Results}
-    \begin{tabular}{llll}
-        \toprule
-        \textbf{Algorithm} & \textbf{acc} & \textbf{recall} & \textbf{F1}\\
-        \midrule
-        node2vec & 0.9444 & 0.9444 & 0.9421\\
-        GCN & 0.9444 & 0.9444 & 0.9473\\
-        Proposed & \textbf{0.9722} & \textbf{0.9722} & \textbf{0.9737}\\
-        \bottomrule
-    \end{tabular}
-\end{frame}
-
 \section{Future work}
 \begin{frame}
     \frametitle{Future work} 
     \begin{enumerate}
-        \item Apply node2vec, GCN, and our proposed model to link prediction.
+        \item Apply node2vec, GCN, and our proposed model to node classification and link prediction.
         \item Try different strategies of hyperparameter tuning.
     \end{enumerate}
     \vspace{1.5cm}
