@@ -1,21 +1,21 @@
-%\documentclass[notes, 10pt, aspectratio=169]{beamer}
-\documentclass[10pt, aspectratio=169]{beamer}
-
-\graphicspath{{graphics/}}
-
-\usetheme[style=fwn]{leidenuniv}
-\useinnertheme{circles}
-\useoutertheme[subsection=false]{miniframes}
-\beamertemplatenavigationsymbolsempty
+%! TeX program = lualatex
+\documentclass[notes, 10pt, aspectratio=169]{beamer}
+%\documentclass[10pt, aspectratio=169]{beamer}
 
 \usepackage{booktabs}
 \usepackage[style=verbose,backend=biber]{biblatex}
 \addbibresource{../snacspaper.bib}
 
 % notes
-%\usepackage{pgfpages}
-%\setbeamertemplate{note page}[plain]
-%\setbeameroption{show notes on second screen=right}
+\usepackage{pgfpages}
+\setbeamertemplate{note page}[plain]
+\setbeameroption{show notes on second screen=right}
+\graphicspath{{graphics/}}
+
+\usetheme[style=fwn]{leidenuniv}
+\useinnertheme{circles}
+\useoutertheme[subsection=false]{miniframes}
+\beamertemplatenavigationsymbolsempty
 
 % uncomment next line to let framesubtitle have palette primary color
 %\setbeamercolor{framesubtitle}{use={palette primary},fg=palette primary.bg}
@@ -35,12 +35,12 @@
 \begin{frame}[plain]
 	\titlepage
 \end{frame}
-%\note{This is the title page}
+\note{This is the title page}
 
 \begin{frame}
 	\tableofcontents
 \end{frame}
-%\note{This is the second page}
+\note{This is the second page}
 
 \section{Introduction}
 \begin{frame}
@@ -50,7 +50,11 @@
         \item Applications: \\
             Social network analysis, recommender systems, molecular structure modelling, etc.
         \item Challenge: Limitations of traditional methods.
-        \item Development of techniques specially for graph representations.
+        \item Development of techniques specially for graph representations.\vspace{0.2cm}
+            \begin{center}
+                \includegraphics[width=10cm]{./graphics/intro.png}
+            \end{center}
+        \item node2vec is a feature learning framework.
     \end{itemize}
 \end{frame}
 
@@ -68,7 +72,7 @@
     \frametitle{Feature Learning Framework}
     \begin{itemize}
         \item Goal: Given a network $G=(V, E)$, find a projection $f:\ V \rightarrow R^d$.
-        \item Generate a d-dimesion vector representation for each node.
+        \item Generate a $d$-dimesion vector representation for each node.
         \item $f$ can be formulated as a matrix of size $\left| V \right| \cdot d$.
     \end{itemize}
 \end{frame}
@@ -131,7 +135,7 @@
     \begin{align*}
         \max_f \sum_{u\in V} \left[ -\log\left( \sum_{u\in V}\exp\left( f(u)\cdot f(v) \right)  \right) + \sum_{n_i\in N_S(u)} f(n_i)\cdot f(u) \right] 
     \end{align*}
-    Use gradient decent stochastic to obtain projection $f$.
+    Use stochastic gradient decent to obtain projection $f$.
 \end{frame}
 
 \begin{frame}
@@ -231,14 +235,14 @@
         \begin{column}{0.5\textwidth}
             $p$ :
             \begin{itemize}
-                \item when set a high value: less likely to sample
+                \item High value: less likely to sample
 an already visited node.
-                \item when set a low value: likely to step back, then walk locally near the source node $u$.
+                \item Low value: likely to step back, then walk locally near the source node $u$.
             \end{itemize}
             $q$ :
             \begin{itemize}
-                \item when set a high value: biased towards nodes close to $t$, act more similarly to BFS.
-                \item when set a low value: biased towards nodes distant to $t$, act more similarly to DFS.
+                \item High value: biased towards nodes close to $t$, act more similarly to BFS.
+                \item Low value: biased towards nodes distant to $t$, act more similarly to DFS.
             \end{itemize}
         \end{column}
     \end{columns}
@@ -303,12 +307,14 @@ an already visited node.
                 Spectral Clustering & 0.0405 & 0.0681 & 0.0395\\
                 DeepWalk & 0.2110 & 0.1768 & 0.1274\\
                 LINE & 0.0784 & 0.1447 & 0.1164\\
-                node2vc & \textbf{0.2581} & \textbf{0.1791} & \textbf{0.1552}\\
+                node2vec & \textbf{0.2581} & \textbf{0.1791} & \textbf{0.1552}\\
                 \midrule
                 node2vec settings (p, q) & 0.25, 0.25 & 4, 1 & 4, 0.5\\
                 Gain of node2vec [\%] & \textbf{22.3} & \textbf{1.3} & \textbf{21.8}\\
                 \bottomrule
             \end{tabular}
+            \par~\\
+        \item node2vec outperforms the other benchmark algorithms.
     \end{itemize}
 \end{frame}
 
@@ -353,9 +359,19 @@ an already visited node.
                 Spectral Clustering & 0.6192 & 0.4920 & 0.5740\\
                 DeepWalk & \textbf{0.9680} & 0.7441 & 0.9340\\
                 LINE & 0.9490 & 0.7249 & 0.8902\\
-                mode2vec & \textbf{0.9680} & \textbf{0.7719} & \textbf{0.9366}\\
+                node2vec & \textbf{0.9680} & \textbf{0.7719} & \textbf{0.9366}\\
                 \bottomrule
             \end{tabular}
+            \par~\\
+        \item The learned feature representations outperform heuristic scores. node2vec achieves the best AUC.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Summary of node2vec}
+    \begin{itemize}
+        \item An efficient graph embedding learning algorithm.
+        \item Search strategy: Both flexible and controllable exploring network neighborhoods.
     \end{itemize}
 \end{frame}
 
@@ -363,9 +379,12 @@ an already visited node.
 \begin{frame}
     \frametitle{Our Contributions}
     \begin{enumerate}
-        \item Visualize the node embeddings during the training of node2vec.
-        \item Propose a novel framework to generate graph embeddings.
-        \item Evaluate node2vec, GNN, and our proposed method on five real-world data sets with metrics that are different from the original paper.
+        \item During the training of node2vec, the intermediate state of node embeddings is a black box.\par
+        Our solution: Visualize the node embeddings during the training of node2vec with t-SNE technique.
+        \item Randomly initialized inputs in GNN affect the robustness of model performance and extend the model training time.\par
+            Our solution: Propose a novel method that uses the pretrained embeddings from node2vec as the meta information for GNN.
+        \item Effectiveness of algorithms.\par
+            Our solution: Evaluate node2vec, GNN, and our proposed method on five real-world data sets with metrics that are different from the original paper.
     \end{enumerate}
 \end{frame}
 
@@ -398,62 +417,6 @@ an already visited node.
    \end{columns}
 \end{frame}
 
-\begin{frame}
-    \frametitle{Graph Neural Network}
-    \begin{columns}
-        \begin{column}{0.5\textwidth}
-            Graph Neural Network is a deep learning framework for graph.\par ~\\
-            General GNN iteration formula:
-            \begin{align*}
-                \displaystyle
-                h_u^{(k)} = \sigma (W_{\text{self}}^{(k)} h_u^{(k-1)} + W_n^{(k)}\sum_{v\in N(u)} h_v^{(k-1)} + b^{(k)} ) 
-            \end{align*}
-            \begin{itemize}
-                \item[] $h_u^{(k)}$: $k$-th layer output embedding of node $u$.
-                \item[] $W^{(k)}$: weights of $k$-th layer (trainable).
-                \item[] $b^{(k)}$: bias of $k$-th layer (trainable).
-                \item[] $\sigma$: activation function.
-            \end{itemize}
-        \end{column}
-        \begin{column}{0.5\textwidth}
-            \includegraphics[width=7cm]{./graphics/gnn.png}
-            Aggregate: To aggregate embeddings of $u$’s neighborhood.\par \vspace{0.2cm}
-            Update: To update $u$’s embeddings using aggregation result and previous $u$’s embeddings.
-        \end{column}
-    \end{columns}
-\end{frame}
-
-\begin{frame}
-    \frametitle{Graph Neural Network}
-    \begin{align*}
-        \displaystyle
-        h_u^{(k)} = \sigma( W_{\text{self}}^{(k)} h_u^{(k-1)} + W_n^{(k)}\sum_{v\in N(u)} h_v^{(k-1)} + b^{(k)} ) 
-    \end{align*}
-    Final output embeddings can be used for calculating predictions. Then, we can use these predictions to compute the loss and optimize parameters with back propagation.\par \vspace{0.2cm}\pause
-    Problem: How to produce $h_u^0$ for each node?
-    \begin{enumerate}
-        \item Use one-hot vector for each node.
-            \begin{itemize}
-                \item[-] Drawback: The total number of nodes is large. Using one-hot vector for each node will cause the input tensor to be very sparse.
-            \end{itemize} 
-        \item<3-> Transfer pretrained embeddings from other similar tasks.
-            \begin{itemize}
-                \item[-] Drawback: There can't always be a similar task with pretrained embeddings for every network.
-            \end{itemize}
-        \item<4-> Use a trainable embedding layer to allocate randomly initialized embeddings for each node.
-            \begin{itemize}
-                \item[-] Drawback: Randomly initialized embeddings could have negative impact on training process.
-            \end{itemize}
-    \end{enumerate}
-\end{frame}
-
-\begin{frame}
-    \frametitle{Combine node2vec and GNN}
-    node2vec can produce embeddings for each node with graph information.\par ~\\
-    GNN lacks a good general method to initialize its input nodes’ embeddings.\par ~\\
-    We can use node2vec to produce initial input nodes’ embeddings for GNN to improve training process of GNN and obtain better performance.\par ~\\
-    It’s a general method because there is no specific requirement of graphs when applying node2vec and GNN.
-\end{frame}
 
 \begin{frame}
     \frametitle{Proposed Method}
@@ -502,72 +465,15 @@ an already visited node.
 
 \begin{frame}
     \frametitle{Preliminary Results}
-    \begin{itemize}
-        \item Results: AIFB \par~\\
-            \begin{tabular}{llll}
-                \toprule
-                \textbf{Algorithm} & \textbf{acc} & \textbf{recall} & \textbf{F1}\\
-                \midrule
-                node2vec & 0.9444 & 0.9444 & 0.9421\\
-                GCN & 0.9444 & 0.9444 & 0.9473\\
-                Proposed & \textbf{0.9722} & \textbf{0.9722} & \textbf{0.9737}\\
-                \bottomrule
-            \end{tabular}
-    \end{itemize}
-    \begin{columns}
-        \begin{column}{0.5\textwidth}
-            \includegraphics[width=\textwidth]{./graphics/loss-4.png}
-        \end{column}
-        \begin{column}{0.5\textwidth}
-            \includegraphics[width=\textwidth]{./graphics/f1-4.png}
-        \end{column}
-    \end{columns}
-\end{frame}
-
-\begin{frame}
-    \frametitle{Preliminary Results}
-    \begin{itemize}
-        \item Results: MUTAG \par~\\
-            \begin{tabular}{llll}
-                \toprule
-                \textbf{Algorithm} & \textbf{acc} & \textbf{recall} & \textbf{F1}\\
-                \midrule
-                node2vec & \textbf{0.7941} & 0.5652 & 0.6500\\
-                GCN & 0.7206 & 0.7206 & 0.7024\\
-                Proposed & 0.7353 & \textbf{0.7353} & \textbf{0.7322}\\
-                \bottomrule
-            \end{tabular}
-    \end{itemize}
-    \begin{columns}
-        \begin{column}{0.5\textwidth}
-            \includegraphics[width=\textwidth]{./graphics/loss.png}
-        \end{column}
-        \begin{column}{0.5\textwidth}
-            \includegraphics[width=\textwidth]{./graphics/f1.png}
-        \end{column}
-    \end{columns}
-\end{frame}
-
-\begin{frame}
-    \frametitle{Preliminary Results}
-    \begin{itemize}
-        \item Results: PubMed \par~\\
-            \begin{tabular}{llll}
-                \toprule
-                \textbf{Algorithm} & \textbf{acc} & \textbf{recall} & \textbf{F1}\\
-                \midrule
-                node2vec &  &  & \\
-                GCN &  &  & \\
-                Proposed &  &  & \\
-                \bottomrule
-            \end{tabular}
-    \end{itemize}
-    \begin{columns}
-        \begin{column}{0.5\textwidth}
-        \end{column}
-        \begin{column}{0.5\textwidth}
-        \end{column}
-    \end{columns}
+    \begin{tabular}{llll}
+        \toprule
+        \textbf{Algorithm} & \textbf{acc} & \textbf{recall} & \textbf{F1}\\
+        \midrule
+        node2vec & 0.9444 & 0.9444 & 0.9421\\
+        GCN & 0.9444 & 0.9444 & 0.9473\\
+        Proposed & \textbf{0.9722} & \textbf{0.9722} & \textbf{0.9737}\\
+        \bottomrule
+    \end{tabular}
 \end{frame}
 
 \section{Future work}
@@ -583,4 +489,61 @@ an already visited node.
     \end{center}
 \end{frame}
 
+\section{Appendix}
+\begin{frame}
+    \frametitle{Graph Neural Network}
+    \begin{columns}
+        \begin{column}{0.5\textwidth}
+            Graph Neural Network is a deep learning framework for graph.\par ~\\
+            General GNN iteration formula:
+            \begin{align*}
+                \displaystyle
+                h_u^{(k)} = \sigma (W_{\text{self}}^{(k)} h_u^{(k-1)} + W_n^{(k)}\sum_{v\in N(u)} h_v^{(k-1)} + b^{(k)} ) 
+            \end{align*}
+            \begin{itemize}
+                \item[] $h_u^{(k)}$: $k$-th layer output embedding of node $u$.
+                \item[] $W^{(k)}$: weights of $k$-th layer (trainable).
+                \item[] $b^{(k)}$: bias of $k$-th layer (trainable).
+                \item[] $\sigma$: activation function.
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \includegraphics[width=7cm]{./graphics/gnn.png}
+            Aggregate: To aggregate embeddings of $u$’s neighborhood.\par \vspace{0.2cm}
+            Update: To update $u$’s embeddings using aggregation result and previous $u$’s embeddings.
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Graph Neural Network}
+    \begin{align*}
+        \displaystyle
+        h_u^{(k)} = \sigma( W_{\text{self}}^{(k)} h_u^{(k-1)} + W_n^{(k)}\sum_{v\in N(u)} h_v^{(k-1)} + b^{(k)} ) 
+    \end{align*}
+    Final output embeddings can be used for calculating predictions. Then, we can use these predictions to compute the loss and optimize parameters with back propagation.\par \vspace{0.2cm}
+    Problem: How to produce $h_u^0$ for each node?
+    \begin{enumerate}
+        \item Use one-hot vector for each node.
+            \begin{itemize}
+                \item[-] Drawback: The total number of nodes is large. Using one-hot vector for each node will cause the input tensor to be very sparse.
+            \end{itemize} 
+        \item Transfer pretrained embeddings from other similar tasks.
+            \begin{itemize}
+                \item[-] Drawback: There can't always be a similar task with pretrained embeddings for every network.
+            \end{itemize}
+        \item Use a trainable embedding layer to allocate randomly initialized embeddings for each node.
+            \begin{itemize}
+                \item[-] Drawback: Randomly initialized embeddings could have negative impact on training process.
+            \end{itemize}
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Combine node2vec and GNN}
+    node2vec can produce embeddings for each node with graph information.\par ~\\
+    GNN lacks a good general method to initialize its input nodes’ embeddings.\par ~\\
+    We can use node2vec to produce initial input nodes’ embeddings for GNN to improve training process of GNN and obtain better performance.\par ~\\
+    It’s a general method because there is no specific requirement of graphs when applying node2vec and GNN.
+\end{frame}
 \end{document}
