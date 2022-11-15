@@ -71,6 +71,7 @@
 \begin{frame}
     \frametitle{Feature Learning Framework}
     \begin{itemize}
+    	\item node2vec is a feature learning framework in nature.
         \item Goal: Given a network $G=(V, E)$, find a projection $f:\ V \rightarrow R^d$.
         \item Generate a $d$-dimesion vector representation for each node.
         \item $f$ can be formulated as a matrix of size $\left| V \right| \cdot d$.
@@ -90,16 +91,17 @@
             Important: $N_S\left( a \right)$ isn’t equavalent to direct local neighborhood.
         \end{column}
         \begin{column}{0.5\textwidth}
-            For NLP: This is a [feature learning \alert{framework} social network].
+            For NLP: Given a literal data: \textit{This is a [feature learning \alert{framework} social network]}.
             \begin{align*}
                 \scriptstyle
                 Pr \left( \left\{ \text{"feature"}, \text{"learning"}, \text{"social"}, \text{"network"} \right\} | \text{"framework"} \right) 
             \end{align*}
-            For Graph:
+            For Graph data: 
             \begin{align*}
                 N_S\left( a \right) &= \left\{ b, c, d, e \right\} \\
             Pr\left( \left\{ b, c, d, e \right\}| a \right) &= Pr\left( N_s\left( a \right) | a \right) 
             \end{align*}
+            Put that graph here!!    
             \pause
             Two problems to be solved:
             \begin{enumerate}
