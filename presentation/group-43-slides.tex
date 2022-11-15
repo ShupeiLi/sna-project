@@ -35,12 +35,12 @@
 \begin{frame}[plain]
 	\titlepage
 \end{frame}
-\note{This is the title page}
+\note{Hello, everyone! We are group 43. The paper we are going to present today is node2vec: scalable feature learning for networks, written by Grover and Leskovec.}
 
 \begin{frame}
 	\tableofcontents
 \end{frame}
-\note{This is the second page}
+\note{This is a brief content of our presentation. Firstly, we will introduce some background knowledge about graph embeddings, followed by a review of related work. Then, we will explain the node2vec algorithm in detail and present experimental results in the original paper. After that, we will introduce the idea of our course project. This presentation is concluded with the future work we plan to do in the project.}
 
 \section{Introduction}
 \begin{frame}
@@ -57,6 +57,7 @@
         \item node2vec is a feature learning framework.
     \end{itemize}
 \end{frame}
+\note{As we've seen in this course, complex relationships can be modelled by graphs. Graph-structured data appears in many modern applications like molecular structure modelling, social network analysis, recommender system, etc. However, if we want to leverage the information contained in graphs, we need to find a way to represent graph-structured data efficiently. Traditional statistical and machine learning methods are designed for extracting features from structured data, such as PCA, UMAP, t-SNE. Although these methods have achieved satisfactory performance on structured-data, they are hard to be generalized to graph-structured data, because they higly depend on properties of Eucildean space. This challenge led to the development of techniques specially for graph representation. Figure on the slide illustrates the general idea of graph embedding learning method. Firstly, we obtain embeddings by mapping graphs onto a low dimension space. And then, we can use these features in some downstream tasks like node classification and link prediction. From this perspective, node2vec algorithm that we address in presentation is a feature learning framework.}
 
 \section{Related Work}
 \begin{frame}
@@ -66,6 +67,7 @@
         \includegraphics[width=14cm]{./graphics/related-work.png}
     \end{center}
 \end{frame}
+\note{This figure illustrates the taxonomy of graph embedding techniques, according to a textbook written by Murphy. There are two types of graph embedding techniques. They are shallow embedding method and deep embedding method. Shallow embedding methods use shallow encoding functions to map the original graph structure onto a Euclidean space and obtain the embedding matrix. If data is labelled, we can apply supervised algorithms to extract embeddings, for example, label propagation. However, labels are not avaliable or only partly avaliable in most cases, where we need to use unspervised or semi-supervised learning. These methods can be divided into distance-based method and outer product method further. Some representative algorithms are given in the figure. It is worth noting that node2vec algorithm we emphasize in presentation belongs to outer product-based method using skip-gram architecture, which is inspired by skip-gram model in natral language processing field. Deep embedding method usually refers to algorithms that learn graph features via graph neural networks, or GNN. GNN is a special class of artificial neural networks designed for graph-structured data. In our project experiments, we mainly use a method called graph convolutional networks, which is a popular GNN architecture.}
 
 \section{Methodology}
 \begin{frame}
@@ -80,7 +82,7 @@
 
 \begin{frame}
     \frametitle{Feature Learning Framework}
-    \begin{columns}
+    \begin{columns}[t]
         \begin{column}{0.5\textwidth}
             Extending skip gram architecture to networks.\par ~\\
             Formulate feature learning in networks as a maximum likelihood optimization problem:
@@ -101,12 +103,14 @@
                 N_S\left( a \right) &= \left\{ b, c, d, e \right\} \\
             Pr\left( \left\{ b, c, d, e \right\}| a \right) &= Pr\left( N_s\left( a \right) | a \right) 
             \end{align*}
-            Put that graph here!!    
-            \pause
-            Two problems to be solved:
+            \begin{center}
+                \vspace{-0.2cm}
+                \includegraphics<1>[width=3.5cm, height=3cm]{./graphics/NLPGA.png}
+            \end{center}
+        \only<2>{Two problems to be solved:}
             \begin{enumerate}
-                \item How to define $N_S\left( a \right) $?
-                \item How to compute $Pr\left( N_S\left( a \right) |a \right) $?
+                \item<2> How to define $N_S\left( a \right) $?
+                \item<2> How to compute $Pr\left( N_S\left( a \right) |a \right) $?
             \end{enumerate}
         \end{column}
     \end{columns}
@@ -187,7 +191,7 @@
             \end{center}
         \end{column}
         \begin{column}{0.5\textwidth}<2->
-            Ramdom walk can combine features of DFS and BFS, and discovery both two kinds of similarities.\par ~\\
+            Random walk can combine features of DFS and BFS, and discovery both two kinds of similarities.\par ~\\
             Still not enough:\\
             It’s hard for us to guide and control the walking process.
         \end{column}
@@ -237,14 +241,14 @@
         \begin{column}{0.5\textwidth}
             $p$ :
             \begin{itemize}
-                \item High value: less likely to sample
+                \item High value: Less likely to sample
 an already visited node.
-                \item Low value: likely to step back, then walk locally near the source node $u$.
+                \item Low value: Likely to step back, then walk locally near the source node $u$.
             \end{itemize}
             $q$ :
             \begin{itemize}
-                \item High value: biased towards nodes close to $t$, act more similarly to BFS.
-                \item Low value: biased towards nodes distant to $t$, act more similarly to DFS.
+                \item High value: Biased towards nodes close to $t$, act more similarly to BFS.
+                \item Low value: Biased towards nodes distant to $t$, act more similarly to DFS.
             \end{itemize}
         \end{column}
     \end{columns}
@@ -295,6 +299,7 @@ an already visited node.
         \item Metrics: Macro-F1 score.
     \end{itemize}
 \end{frame}
+\note{Authors of the original paper conducted two experiments to verify the effectiveness of the node2vec algorithm. The first experiment is multi-label classification. Given a finite label set and a fraction of nodes with labels, the task is predicting the labels for the remaining nodes. They use three data sets: BlogCatalog, PPI, and Wikipedia. The table shows some statistics of data sets. Macro-F1 score is selected as metrics.}
 
 \begin{frame}
     \frametitle{Experiment 1: Multi-label Classification}
@@ -319,6 +324,7 @@ an already visited node.
         \item node2vec outperforms the other benchmark algorithms.
     \end{itemize}
 \end{frame}
+\note{Spectral clustering, DeepWalk, and LINE are selected as benchmarks. From the table, we can see that node2vec outperforms other algorithms on all datasets. Besides, its relative performance gain is significant.}
 
 \begin{frame}
     \frametitle{Experiment 2: Link Prediction}
@@ -343,6 +349,7 @@ an already visited node.
         \item Metrics: Area Under Curve (AUC) score.
     \end{itemize}
 \end{frame}
+\note{The second task is link prediction. Given a network with a fraction of edges removed, the task is predicting these missing edges. They also use three datasets, Facebook, PPI, and arXiv, in this experiment. Statistics of data sets are shown in the table. AUC score is used as metrics.}
 
 \begin{frame}
     \frametitle{Experiment 2: Link Prediction}
@@ -368,6 +375,7 @@ an already visited node.
         \item The learned feature representations outperform heuristic scores. node2vec achieves the best AUC.
     \end{itemize}
 \end{frame}
+\note{When the original paper was published, there were no feature learning algorithms that had been used for link prediction. Therefore, authors set four heuristic scores as benchmarks. The first four lines of table shows the performance of heuristic scores. The other three benchmarks are the same as in the experiment 1. Authors tested average, hadamard, weighted-L1, and weighted-L2 operations on these three benchmarks as well as node2vec. Due to the limited space, table on the slide only shows the result of hadamard operation. We can see that the learned feature representations outperform heuristic scores. And node2vec achieves the best AUC score on all datasets.}
 
 \begin{frame}
     \frametitle{Summary of node2vec}
@@ -376,6 +384,7 @@ an already visited node.
         \item Search strategy: Both flexible and controllable exploring network neighborhoods.
     \end{itemize}
 \end{frame}
+\note{A brief summary of node2vec. It is an algorithm designed for extracting embedidngs from graphs. Results of experiments support the effectiveness of the algorithm. Its neighborhood search strategy is flexible and controllable. We can easily change the behavior of search by adjusting hyperparameter p and q.}
 
 \section{Our work}
 \begin{frame}
@@ -384,11 +393,12 @@ an already visited node.
         \item During the training of node2vec, the intermediate state of node embeddings is a black box.\par
         Our solution: Visualize the node embeddings during the training of node2vec with t-SNE technique.
         \item Randomly initialized inputs in GNN affect the robustness of model performance and extend the model training time.\par
-            Our solution: Propose a novel method that uses the pretrained embeddings from node2vec as the meta information for GNN.
+            Our solution: Propose a novel method that combines node2vec and GNN.
         \item Effectiveness of algorithms.\par
             Our solution: Evaluate node2vec, GNN, and our proposed method on five real-world data sets with metrics that are different from the original paper.
     \end{enumerate}
 \end{frame}
+\note{Next, I will talk about our contributions in the project. Firstly, the intermediate state of node embeddings during node2vec training is a black box. We try to visualize the node embeddings with t-SNE technique to provide some insights into node2vec. Secondly, we find that researchers in graph embedding learning field have focused more on deep embedding methods these years. However, randomly initialized inputs in GNN affect the robustness of model performance and extend the training time. To address the problem, we proposed a novel method that combines node2vec and GNN. Thirdly, to further test the effectiveness of algorithms, we evaluate node2vec, GNN, and our proposed method on five real world datasets and select different metrics.}
 
 \begin{frame}
    \begin{columns}
@@ -418,7 +428,7 @@ an already visited node.
        \end{column}
    \end{columns}
 \end{frame}
-
+\note{We apply node2vec algorithm on an open source dataset AIFB. Results of visualization are showed on the slide. Each node in AIFB belongs to a class. The total number of classes is four. We set the number of epochs to 100. It is easy to see that nodes embeddings are changed from chaos into order during the training of node2vec.}
 
 \begin{frame}
     \frametitle{Proposed Method}
@@ -445,6 +455,7 @@ an already visited node.
         \end{column}
     \end{columns}
 \end{frame}
+\note{As mentioned before, random initialization in GNN may not be a good strategy. Inspired by the concept of meta learning, we use the pretrained embeddings from node2vec as the meta information for GNN. Figure on the right illustrates the architecture of our proposed model. We expect our method will accelerate the training stage of GNN and improve the model performance. We choose graph convolutional network or GCN in our experiments. The iteration formula of GCN is given on the slide. Preliminary results we have obtained so far support the effectiveness of our proposed method.}
 
 \section{Future work}
 \begin{frame}
@@ -454,6 +465,7 @@ an already visited node.
         \item Try different strategies of hyperparameter tuning.
     \end{enumerate}
 \end{frame}
+\note{Our future work will mainly focus on two tasks. Task one, apply node2vec, GCN, and our proposed model to node classification and link prediction. Task two, try different strategies of hyperparameter tuning. Due to the time limit, we omit technical details of GNN. If you are interested in GNN, we can discuss the principle of GNN together. Thank you. This's all of our presentation. Any questions?}
 
 \section{Appendix}
 \begin{frame}
