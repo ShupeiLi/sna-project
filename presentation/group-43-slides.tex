@@ -1,3 +1,4 @@
+%\documentclass[notes, 10pt, aspectratio=169]{beamer}
 \documentclass[10pt, aspectratio=169]{beamer}
 
 \graphicspath{{graphics/}}
@@ -10,6 +11,11 @@
 \usepackage{booktabs}
 \usepackage[style=verbose,backend=biber]{biblatex}
 \addbibresource{../snacspaper.bib}
+
+% notes
+%\usepackage{pgfpages}
+%\setbeamertemplate{note page}[plain]
+%\setbeameroption{show notes on second screen=right}
 
 % uncomment next line to let framesubtitle have palette primary color
 %\setbeamercolor{framesubtitle}{use={palette primary},fg=palette primary.bg}
@@ -29,10 +35,12 @@
 \begin{frame}[plain]
 	\titlepage
 \end{frame}
+%\note{This is the title page}
 
 \begin{frame}
 	\tableofcontents
 \end{frame}
+%\note{This is the second page}
 
 \section{Introduction}
 \begin{frame}
@@ -352,6 +360,15 @@ an already visited node.
 \end{frame}
 
 \section{Our work}
+\begin{frame}
+    \frametitle{Our Contributions}
+    \begin{enumerate}
+        \item Visualize the node embeddings during the training of node2vec.
+        \item Propose a novel framework to generate graph embeddings.
+        \item Evaluate node2vec, GNN, and our proposed method on five real-world data sets with metrics that are different from the original paper.
+    \end{enumerate}
+\end{frame}
+
 \begin{frame}
    \begin{columns}
        \begin{column}{0.33\textwidth}
