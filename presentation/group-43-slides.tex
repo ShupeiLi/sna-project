@@ -105,18 +105,14 @@
                 N_S\left( a \right) &= \left\{ b, c, d, e \right\} \\
             Pr\left( \left\{ b, c, d, e \right\}| a \right) &= Pr\left( N_s\left( a \right) | a \right) 
             \end{align*}
-<<<<<<< HEAD
-            Put that graph here!! 
+            \begin{center}
+        	  \vspace{-0.2cm}
+        	  \includegraphics<1>[width=3.5cm, height=3cm]{./graphics/NLPGA.png}
+            \end{center}
+
             \note{So how to determine this projection f? Inspired by skip gram architecture in Natural language processing area, the authors formulate this problem as a maximum likelihood optimization problem. In NLP area, the given dataset contains literal data and we want to generate embedding vectors for each word. And skip gram architecture is to use a sliding window to obtain nearest neighbors for a word. Like here in the rightside example, in this sentence, feature - learning  - social - network is in the sliding window of the word framework. Then it computes and optimizes the likelihood probability for these four words in the sliding window to a maximum value. Then the literal structure information such as order of words in a sentence can be maintained most in the words embedding. In a similar way, now we are given a network data and wants to generate embedding vectors for each node. And at the same time we want our embedding to maintain as much as possible graph structure information. So we should have something similar to a sliding window in NLP problem. Perhaps for network data, it’s not as intuitional as NLP problem to define this sliding window.  In fact, the equavalent sliding window for network data is called network neighborhood Ns. Here please pay attention to definition of Ns. This network neighborhood isn’t equivalent to direct local neighborhood. We know the commonly used direct local neighborhood is totally decided by the graph structure. But this  Ns is not only related to the graph structure, but also related to a sampling strategy. And then we can compute the likelihood probability just like what we do in NLP area.}   
             \pause
-            Two problems to be solved:
-=======
-            \begin{center}
-                \vspace{-0.2cm}
-                \includegraphics<1>[width=3.5cm, height=3cm]{./graphics/NLPGA.png}
-            \end{center}
         \only<2>{Two problems to be solved:}
->>>>>>> 26a1ae693eb5ee920d088f444dae812deb3926ab
             \begin{enumerate}
                 \item<2> How to define $N_S\left( a \right) $?
                 \item<2> How to compute $Pr\left( N_S\left( a \right) |a \right) $?
