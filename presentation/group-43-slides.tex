@@ -77,6 +77,8 @@
         \item $f$ can be formulated as a matrix of size $\left| V \right| \cdot d$.
     \end{itemize}
 \end{frame}
+\note{Now we start to talk about methodology of node2vec. As we have shown on previous slides, node2vec is a feature learning framework in nature. So let’s give feature learning framework a formal defination. Feature learning framework aims to find a projection f,  which projects nodes set V to vector space. In other words, the task of a feature learning framework like node2vec is to generate a d-dimension embedding vector representation for each node. So, in mathematics form,  f can be formulated as a matrix of size v times d.
+}
 
 \begin{frame}
     \frametitle{Feature Learning Framework}
@@ -101,7 +103,8 @@
                 N_S\left( a \right) &= \left\{ b, c, d, e \right\} \\
             Pr\left( \left\{ b, c, d, e \right\}| a \right) &= Pr\left( N_s\left( a \right) | a \right) 
             \end{align*}
-            Put that graph here!!    
+            Put that graph here!! 
+            \note{So how to determine this projection f? Inspired by skip gram architecture in Natural language processing area, the authors formulate this problem as a maximum likelihood optimization problem. In NLP area, the given dataset contains literal data and we want to generate embedding vectors for each word. And skip gram architecture is to use a sliding window to obtain nearest neighbors for a word. Like here in the rightside example, in this sentence, feature - learning  - social - network is in the sliding window of the word framework. Then it computes and optimizes the likelihood probability for these four words in the sliding window to a maximum value. Then the literal structure information such as order of words in a sentence can be maintained most in the words embedding. In a similar way, now we are given a network data and wants to generate embedding vectors for each node. And at the same time we want our embedding to maintain as much as possible graph structure information. So we should have something similar to a sliding window in NLP problem. Perhaps for network data, it’s not as intuitional as NLP problem to define this sliding window.  In fact, the equavalent sliding window for network data is called network neighborhood Ns. Here please pay attention to definition of Ns. This network neighborhood isn’t equivalent to direct local neighborhood. We know the commonly used direct local neighborhood is totally decided by the graph structure. But this  Ns is not only related to the graph structure, but also related to a sampling strategy. And then we can compute the likelihood probability just like what we do in NLP area.}   
             \pause
             Two problems to be solved:
             \begin{enumerate}
@@ -111,6 +114,8 @@
         \end{column}
     \end{columns}
 \end{frame}
+\note{So here comes two key problems. First is how to define this network neighborhood and its corresponding sampling strategy S? The second is given Ns, how can we compute this likelihood probability for each node.
+}
 
 \begin{frame}
     \frametitle{Maximum Likehood Optimization}
@@ -130,6 +135,8 @@
             \end{align*}
     \end{enumerate}
 \end{frame}
+\note{Let’s see the second question first. To compute this formula, the authors made two assumptions to simplify the calculation. The first is conditional independence, which means the likelihood probablity to observe a neighborhood node is independent from observing any other neighborhood node. So because of the property of independent event, the likelihood probability can be rewritten in the form of this multiplication way. The second is symmetry in feature space, which means a source node and neighborhood node have a symmetric effect over each other in feature space. And then the authors model the likelihood probability for each pair of nodes as a softmax function.
+}
 
 \begin{frame}
     \frametitle{Maximum Likehood Optimization}
@@ -139,6 +146,8 @@
     \end{align*}
     Use stochastic gradient decent to obtain projection $f$.
 \end{frame}
+\note{So, with these two assumptions, the original optimization problem can be converted into the rightside formula. And for this formula, we can apply stochastic gradient decent method to obtain the optimal projection f.
+}
 
 \begin{frame}
     \frametitle{Network Neighborhood Sampling Strategy}
@@ -156,6 +165,9 @@
     DFS tends to discover homophily, BFS tends to discover structural equivalence.\par \vspace{0.2cm}
     How to discover both kinds of similarities?
 \end{frame}
+\note{Now we come to the first problem, which is the most important part of node2vec, how to define sampling strategy and network neighborhood. Perhaps you are thinking why don’t we directly apply commonly used  local neighborhood as sliding window. That’s because there are two kinds of similarities, one is homophily, the other is structural equivalence. Let me explain in this example, homophily means two nodes are in the same group or community, such as u and s1. Structural equivalence means the nodes play a similar role in network, such as a bridge or a hub. The node u and s6 in this graph are both hub in their community so they share a structural equivalence. Directly applying local neighborhood is like using classic search strategy BFS, it tends to discover structural equivalence. On the contrary, there are another classic search strategy, DFS, tends to discover homophily. So, applying sampling method like this cannot discover both kind of two similarities at the same time and then fail to capture entire network features information. Therefore, we should come up with a better sampling method to combine BFS and DFS.
+}
+
 
 \begin{frame}
     \frametitle{Network Neighborhood Sampling Strategy}
@@ -175,6 +187,8 @@
         \item[] $Z$: normalization constant.
     \end{itemize}
 \end{frame}
+\note{Then we have a method called random walk which allows us to achieve it. Random walk is a method to take L steps to visit several nodes.  And we use the nodes which are visited in a walk as the network neighborhood of the source node. The most important thing for random walk is to decide which node to go in the next step. The formula on the slides gives out the transition probability. And you can see in this formula, there’s a pi v x, the unnormalized transition probability, needed to be determined.
+}
 
 \begin{frame}
     \frametitle{Network Neighborhood Sampling Strategy}
@@ -186,6 +200,8 @@
                 \includegraphics[width=5cm]{./graphics/Randomwalk.png}
             \end{center}
         \end{column}
+        \note{Usually, the pi vx is set equal to the edge weight. And in unweighted garph, pi vx is set to 1, which means the all the neighborhood nodes will equally share the probability of being visited in the next step. So in this example, v is the current node, so node t and x1 2 3 will each have 1 over 4 probability to be visited in the next step.
+        }
         \begin{column}{0.5\textwidth}<2->
             Ramdom walk can combine features of DFS and BFS, and discovery both two kinds of similarities.\par ~\\
             Still not enough:\\
@@ -193,6 +209,8 @@
         \end{column}
     \end{columns}
 \end{frame}
+\note{Random walk can allows us to visit and sample local nodes which are near to the source node, but also allows us to visit distant nodes which are far away from the source node. So it can combine features of DFS and BFS, and then can discover both kinds of similarities. But it’s still not enough. Because the entire walking process is random, it’s hard for us to guide and control the walking process.
+}
 
 \begin{frame}
     \frametitle{Network Neighborhood Sampling Strategy}
@@ -221,6 +239,7 @@
         \end{column}
     \end{columns}
 \end{frame}
+\note{So the authors came up with an upgraded version, the second order bias random walk, which uses a bias value alpha, together with edge weight to decide the transition probability pi vx. And suppose currently we are in node v and want to decide which node to go in the next step. There are always three choices for us. The first choice is to step back, which means to return to node t, where we come from. The second is to stay around, which means to stay in the ego network of node t. The third choice is to go away, which means to go to a new node and jump out of the ego network of t. And in this second order bias random walk, we give these three choices different  transition probability. As you can see in the formula, dtx= zero one two means we choose to step back, stay around, and go away respectively. And these transition probability is controlled by two hyper parameters p and q}
 
 \begin{frame}
     \frametitle{Network Neighborhood Sampling Strategy}
@@ -249,12 +268,16 @@ an already visited node.
         \end{column}
     \end{columns}
 \end{frame}
+\note{And for this example graph, the unnormalized transition probability shall be like this. Through controlling the value of p and q, we can also get control of the walking process. For example, for p, a high value will decrease the transition probability to step back, then the sampling strategy is less likely to sample an already visited node. And for q, a high value will decrease the transition probability for the walk to go away. Then the walk process will be biased towards nodes close to t, and act more similarly to BFS. On the contrary, a low q value will make the walking process biased towards nodes distant from t, and act more similarly to DFS. 
+}
 
 \begin{frame}
     \frametitle{Learning Edge Features}
     We have found a projection $f: V\rightarrow R^d$ with node2vec, which allocates each node vector embedding representation.\par \vspace{0.2cm}
     These embedding vectors can be used in node-related downstream tasks.\par \vspace{0.2cm}
     But how to learn edge features and deal with edge-related downstream tasks?\pause
+    \note{Up to now, we have worked out the two problems for node2vec. And then we can allocate each node a vector embedding representation, which can be used in node-related downstream task such as node classification. But how can we learn edge features and deal with edge-related downstream task?
+    }
     \begin{center}
         \begin{tabular}{lll}
             \toprule
@@ -269,6 +292,8 @@ an already visited node.
     \end{center}
     Given projection $f$ obtained by node2vec and two nodes $u$, $v$ along with edge $(u,v)$, apply \\ the binary operator on $f(u)$ and $f(v)$ to generate the representation $g(u,v)$, where $g: V\times V\rightarrow R^{d^{'}}$.
 \end{frame}
+\note{The idea is very simple. Since each edge is composed of two nodes, so we can apply a binary operation to obtain a projection g and its corresponding edge embedding vectors. Here this table shows four commonly used binary operator. As long as we have obtained projection f, we can obtain projection g and edge embedding in this simple way. 
+}
 
 \section{Experiments}
 \begin{frame}
