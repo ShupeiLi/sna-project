@@ -8,7 +8,22 @@ from tqdm import tqdm
 from node2vec import *
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score
+import torch.nn as nn
+from torch_geometric.nn import GCNConv
 
+class GCN_Entity(nn.Module):
+    def __init__(self, nodes_number,embedding_dim, metainfor, use_metainfor):
+        super(GCN_Entity,self).__init__()
+        self.embedding=torch.nn.Embedding(num_embeddings=nodes_number,embedding_dim=embedding_dim)
+        self.gcn=GCNConv(in_channels=embedding_dim,out_channels=embedding_dim)
+        if use_metainfor==True:
+            self.embedding.from_pretrained(metainfor,freeze=False)
+    
+    def forward(self, nodes, edges):
+        nodes_embedding=self.embedding(nodes)
+        nodes_embedding=self.gcn(nodes_embedding,edges)
+        #nodes_embedding=torch.relu(nodes_embedding)
+        return nodes_embedding
 
 def not_connected_store(path, edge_arr, node_arr):
     print("Creating a dictionary of non-existed edges...")
@@ -91,13 +106,18 @@ class LinkPred(BaseModel):
         Refer to https://pytorch-geometric.readthedocs.io/en/latest/_modules/torch_geometric/nn/models/node2vec.html#Node2Vec
         for other parameters.
     """
-    def __init__(self, data, num_nodes, train_data, test_data, oper, lr=0.001, epochs=50, embedding_dim=128, walk_length=20, context_size=10,
+    def __init__(self, data, num_nodes, train_data, test_data, oper, gnn=True, use_metainfor=True, gnn_epoch=120,lr=0.001, epochs=50, embedding_dim=128, walk_length=20, context_size=10,
             walks_per_node=10, num_negative_samples=1, p=1, q=1, sparse=True, batch_size=128):
         self.data = data
         self.epochs = epochs
         self.train_data = train_data
         self.test_data = test_data
         self.oper = oper
+        self.gnn_epoch=gnn_epoch
+        self.gnn=gnn 
+        self.use_metainfor=use_metainfor
+        self.num_nodes=num_nodes
+        self.embedding_dim=embedding_dim
         self.preprocessing(num_nodes, lr, embedding_dim, walk_length, context_size, walks_per_node, 
                 num_negative_samples, p, q, sparse, batch_size)
 
@@ -107,30 +127,71 @@ class LinkPred(BaseModel):
         if oper == 1:
             return (features1 +  features2) / 2
         elif oper == 2:
-            return feature1 * feature2
+            return features1 * features2
         elif oper == 3:
-            return np.abs(feature1 - feature2)
+            return np.abs(features1 - features2)
         else:
-            return (feature1 - feature2) ** 2
+            return (features1 - features2) ** 2
+    
+    def down_stream_train(self):
+        self.model.eval()
+        self.z = self.model().detach().cpu()
 
+            
+        if self.gnn == False:
+            train_node_arr = self.train_data[:, [0, 1]]
+            train_y = self.train_data[:, 2]
+            train_X = self._edge_features(self.z, train_node_arr, self.oper)           
+            self.clf = LogisticRegression()
+            self.clf.fit(train_X, train_y)
+            
+        if self.gnn == True:
+            train_y = self.train_data[:, 2]
+            #shuffle = np.arange(len(train_y))
+            train_node_arr = self.train_data[:, [0, 1]]
+            #train_node_arr = train_node_arr[shuffle]                
+            train_y = torch.tensor(train_y,dtype=torch.float32)
+            #train_y = train_y[shuffle]
+            self.clf=GCN_Entity(nodes_number=self.num_nodes, embedding_dim=self.embedding_dim,use_metainfor=self.use_metainfor, metainfor=self.z)
+            self.clf.train()
+            loss_fn=torch.nn.BCELoss()
+            optimizer=torch.optim.Adam(params=self.clf.parameters(),lr=0.01)
+            for i in range(self.gnn_epoch):
+                y_pred = self.clf(self.data.x.reshape(-1,), self.data.edge_index)
+                y_pred = self._edge_features(y_pred, train_node_arr, oper=2)
+                y_pred = y_pred.mean(axis=1)
+                y_pred = nn.functional.sigmoid(y_pred)
+                loss=loss_fn(y_pred, train_y)
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+                print(f"GCN training loss: {loss.item():.3f}")
+            
+                
+
+   
+    
     @torch.no_grad()
     def test(self):
-        self.model.eval()
-        z = self.model().detach().cpu().numpy()
-        
-        train_node_arr = self.train_data[:, [0, 1]]
-        train_y = self.train_data[:, 2]
-        train_X = self._edge_features(z, train_node_arr, self.oper)
-        
         test_node_arr = self.test_data[:, [0, 1]]
-        y_true = self.test_data[:, 2]
-        test_X = self._edge_features(z, test_node_arr, self.oper)
-
-        clf = LogisticRegression()
-        clf.fit(train_X, train_y)
-        y_pred = clf.predict_proba(test_X)[:, 1]
-        auc = roc_auc_score(y_true, y_pred)
-        return auc
+        test_X = self._edge_features(self.z, test_node_arr, self.oper)
+        y_true = self.test_data[:, 2]  
+        y_true = torch.tensor(y_true)
+        if self.gnn == False:
+            y_pred = self.clf.predict_proba(test_X)[:, 1]
+            auc = roc_auc_score(y_true, y_pred)
+            return auc
+        
+        if self.gnn == True:
+            y_pred = self.clf(self.data.x.reshape(-1,), self.data.edge_index)
+            y_pred = self._edge_features(y_pred, test_node_arr, oper=2)
+            y_pred = y_pred.mean(axis=1)
+            y_pred = nn.functional.sigmoid(y_pred)
+            y_pred[y_pred<0.5]=0
+            y_pred[y_pred>=0.5]=1
+            auc = roc_auc_score(y_true, y_pred)
+            #acc = (y_pred==y_true).sum()/len(y_pred)
+            return auc
 
     @cal_time
     def main(self):
@@ -138,5 +199,6 @@ class LinkPred(BaseModel):
             raise AttributeError(f"Class attribute 'epochs' is not defined.")
         for epoch in range(1, self.epochs + 1):
             loss = self.train()
-            auc = self.test()
-            print(f"Epoch: {epoch:02d}, Train Loss: {loss:.4f}, Test Auc: {auc:.4f}.")
+        self.down_stream_train()
+        auc = self.test()
+        print(f"Test Auc: {auc:.4f}")
