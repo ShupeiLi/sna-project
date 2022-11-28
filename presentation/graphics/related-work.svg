@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="248mm"
+   height="56mm"
+   viewBox="0 0 248 56"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
+   sodipodi:docname="related-work.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="true"
+     inkscape:zoom="1.0289025"
+     inkscape:cx="492.27211"
+     inkscape:cy="62.688156"
+     inkscape:window-width="1920"
+     inkscape:window-height="1058"
+     inkscape:window-x="0"
+     inkscape:window-y="22"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1"
+     width="250mm">
+    <inkscape:grid
+       type="xygrid"
+       id="grid824" />
+  </sodipodi:namedview>
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;line-height:1.25;font-family:'Noto Serif';-inkscape-font-specification:'Noto Serif';stroke-width:0.264583"
+       x="4.9701204"
+       y="19.720871"
+       id="text2566"><tspan
+         sodipodi:role="line"
+         id="tspan2564"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;font-family:'Noto Serif';-inkscape-font-specification:'Noto Serif';stroke-width:0.264583"
+         x="4.9701204"
+         y="19.720871">Shallow Embedding Method</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;line-height:1.25;font-family:'Noto Serif';-inkscape-font-specification:'Noto Serif';stroke-width:0.264583"
+       x="5.012454"
+       y="54.293354"
+       id="text2566-6"><tspan
+         sodipodi:role="line"
+         id="tspan2564-2"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;font-family:'Noto Serif';-inkscape-font-specification:'Noto Serif';stroke-width:0.264583"
+         x="5.012454"
+         y="54.293354">Deep Embedding Method: </tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;line-height:1.25;font-family:'Noto Serif';-inkscape-font-specification:'Noto Serif';stroke-width:0.264583"
+       x="66.709251"
+       y="3.8379872"
+       id="text15351"><tspan
+         sodipodi:role="line"
+         id="tspan15349"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;font-family:'Noto Serif';-inkscape-font-specification:'Noto Serif';stroke-width:0.264583"
+         x="66.709251"
+         y="3.8379872">Supervised Learning: Label propagation</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;line-height:1.25;font-family:'Noto Serif';-inkscape-font-specification:'Noto Serif';stroke-width:0.264583"
+       x="66.848953"
+       y="30.377481"
+       id="text17555"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;font-family:'Noto Serif';-inkscape-font-specification:'Noto Serif';stroke-width:0.264583"
+         x="66.848953"
+         y="30.377481"
+         id="tspan18547">Unsupervised Learning / </tspan><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;font-family:'Noto Serif';-inkscape-font-specification:'Noto Serif';stroke-width:0.264583"
+         x="66.848953"
+         y="35.669144"
+         id="tspan18551">Semi-supervised Learning</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;line-height:1.25;font-family:'Noto Serif';-inkscape-font-specification:'Noto Serif';stroke-width:0.264583"
+       x="123.75444"
+       y="27.944887"
+       id="text26265"><tspan
+         sodipodi:role="line"
+         id="tspan26263"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;font-family:'Noto Serif';-inkscape-font-specification:'Noto Serif';stroke-width:0.264583"
+         x="123.75444"
+         y="27.944887">Distance-based: Multi-dimensional scaling</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;line-height:1.25;font-family:'Noto Serif';-inkscape-font-specification:'Noto Serif';fill:#000000;stroke-width:0.264583"
+       x="123.67823"
+       y="38.01926"
+       id="text27413"><tspan
+         sodipodi:role="line"
+         id="tspan27411"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;font-family:'Noto Serif';-inkscape-font-specification:'Noto Serif';fill:#000000;stroke-width:0.264583"
+         x="123.67823"
+         y="38.01926">Outer Product-based</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:4.23333px;line-height:1.25;font-family:sans-serif;stroke-width:0.264583"
+       x="59.73793"
+       y="54.174816"
+       id="text46995"><tspan
+         sodipodi:role="line"
+         id="tspan46993"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;font-family:'Noto Serif';-inkscape-font-specification:'Noto Serif';fill:#ff0000;stroke-width:0.264583"
+         x="59.73793"
+         y="54.174816">GCN</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:4.23333px;line-height:1.25;font-family:sans-serif;stroke-width:0.264583"
+       x="227.7411"
+       y="44.710018"
+       id="text46995-9"><tspan
+         sodipodi:role="line"
+         id="tspan46993-7"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;font-family:'Noto Serif';-inkscape-font-specification:'Noto Serif';fill:#ff0000;stroke-width:0.264583"
+         x="227.7411"
+         y="44.710018">node2vec</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:4.23333px;line-height:1.25;font-family:sans-serif;stroke-width:0.264583"
+       x="170.24205"
+       y="35.670094"
+       id="text1240"><tspan
+         sodipodi:role="line"
+         id="tspan1238"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;font-family:'Noto Serif';-inkscape-font-specification:'Noto Serif';stroke-width:0.264583"
+         x="170.24205"
+         y="35.670094">Matrix Factorization</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:4.23333px;line-height:1.25;font-family:sans-serif;stroke-width:0.264583"
+       x="170.19972"
+       y="44.643261"
+       id="text2780"><tspan
+         sodipodi:role="line"
+         id="tspan2778"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;font-family:'Noto Serif';-inkscape-font-specification:'Noto Serif';stroke-width:0.264583"
+         x="170.19972"
+         y="44.643261">Skip-gram: DeepWalk, LINE,  </tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 3.96875,18.520833 H 2.6458333 V 52.916666 H 3.96875"
+       id="path20759" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 63.499999,18.520833 h 1.322917 V 2.6458333 h 1.322916"
+       id="path20761" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 64.822916,18.520833 V 31.75 h 1.322916"
+       id="path20763" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 120.38542,31.75 h 1.32291 v -5.291667 h 1.32292"
+       id="path20878" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 121.70833,31.75 v 5.291666 h 1.32292"
+       id="path20880" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 166.6875,37.041666 h 1.32291 v -2.645833 h 1.32292"
+       id="path21014" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 168.01041,37.041666 v 6.614583 h 1.32292"
+       id="path21016" />
+  </g>
+</svg>
