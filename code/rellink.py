@@ -33,7 +33,10 @@ train_graph = Data(x=torch.tensor(np.expand_dims(node_arr, axis=1)), edge_index=
 
 
 if __name__ == "__main__":
-    rellink_model = LinkPred(train_graph, None, train_data, val_data, test_data, 1, node2vec_epoch=5)
+#   rellink_model = LinkPred(train_graph, None, train_data, val_data, test_data, 1, node2vec_epoch=5)
+    for oper in range(1, 5):
+        rellink_model = LinkPred(train_graph, None, train_data, val_data, test_data, oper, node2vec_epoch=5)
+        rellink_model.tuning(f"rellink_{oper}")
 #   rellink_model.main()
 #   rellink_gcn_model = LinkPredGCN(train_graph, None, train_data, val_data, test_data, 1, proposed=False, gnn_epoch=10)
 #   rellink_gcn_model.main()

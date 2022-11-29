@@ -33,7 +33,10 @@ train_graph = Data(x=torch.tensor(np.expand_dims(node_arr, axis=1)), edge_index=
 
 
 if __name__ == "__main__":
-    wordnet_model = LinkPred(train_graph, node_arr.shape[0], train_data, val_data, test_data, 1, node2vec_epoch=5)
+#   wordnet_model = LinkPred(train_graph, node_arr.shape[0], train_data, val_data, test_data, 1, node2vec_epoch=5)
+    for oper in range(1, 5):
+        wordnet_model = LinkPred(train_graph, node_arr.shape[0], train_data, val_data, test_data, oper, node2vec_epoch=5)
+        wordnet_model.tuning(f"wordnet_{oper}")
 #   wordnet_model.main()
 #   wordnet_gcn_model = LinkPredGCN(train_graph, node_arr.shape[0], train_data, val_data, test_data, 1, proposed=False, gnn_epoch=10)
 #   wordnet_gcn_model.main()
