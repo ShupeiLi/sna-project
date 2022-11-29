@@ -11,19 +11,6 @@ from sklearn.metrics import roc_auc_score
 import torch.nn as nn
 from torch_geometric.nn import GCNConv
 
-class GCN_Entity(nn.Module):
-    def __init__(self, nodes_number,embedding_dim, metainfor, use_metainfor):
-        super(GCN_Entity,self).__init__()
-        self.embedding=torch.nn.Embedding(num_embeddings=nodes_number,embedding_dim=embedding_dim)
-        self.gcn=GCNConv(in_channels=embedding_dim,out_channels=embedding_dim)
-        if use_metainfor==True:
-            self.embedding.from_pretrained(metainfor,freeze=False)
-    
-    def forward(self, nodes, edges):
-        nodes_embedding=self.embedding(nodes)
-        nodes_embedding=self.gcn(nodes_embedding,edges)
-        #nodes_embedding=torch.relu(nodes_embedding)
-        return nodes_embedding
 
 def not_connected_store(path, edge_arr, node_arr):
     print("Creating a dictionary of non-existed edges...")
@@ -137,7 +124,6 @@ class LinkPred(BaseModel):
         self.model.eval()
         self.z = self.model().detach().cpu()
 
-            
         if self.gnn == False:
             train_node_arr = self.train_data[:, [0, 1]]
             train_y = self.train_data[:, 2]
@@ -166,10 +152,6 @@ class LinkPred(BaseModel):
                 loss.backward()
                 optimizer.step()
                 print(f"GCN training loss: {loss.item():.3f}")
-            
-                
-
-   
     
     @torch.no_grad()
     def test(self):
@@ -202,3 +184,18 @@ class LinkPred(BaseModel):
         self.down_stream_train()
         auc = self.test()
         print(f"Test Auc: {auc:.4f}")
+
+
+class LinkGCN(nn.Module):
+    def __init__(self, nodes_number,embedding_dim, metainfor, use_metainfor):
+        super(LinkGCN, self).__init__()
+        self.embedding = torch.nn.Embedding(num_embeddings=nodes_number, embedding_dim=embedding_dim)
+        self.gcn = GCNConv(in_channels=embedding_dim, out_channels=embedding_dim)
+        if use_metainfor == True:
+            self.embedding.from_pretrained(metainfor, freeze=False)
+    
+    def forward(self, nodes, edges):
+        nodes_embedding = self.embedding(nodes)
+        nodes_embedding = self.gcn(nodes_embedding, edges)
+        #nodes_embedding=torch.relu(nodes_embedding)
+        return nodes_embedding

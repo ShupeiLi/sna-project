@@ -88,8 +88,8 @@ class EntitiesBase(BaseModel):
         y_true = self.data.test_y.detach().cpu().numpy()
         acc = accuracy_score(y_true, y_pred)
         if self.multi:
-            recall = recall_score(y_true, y_pred, labels=np.unique(y_true), average="weighted")
-            f1 = f1_score(y_true, y_pred, labels=np.unique(y_true), average="weighted")
+            recall = recall_score(y_true, y_pred, labels=np.unique(y_true), average="macro")
+            f1 = f1_score(y_true, y_pred, labels=np.unique(y_true), average="macro")
         else:
             recall = recall_score(y_true, y_pred)
             f1 = f1_score(y_true, y_pred)
@@ -113,6 +113,30 @@ class EntitiesGCN(EntitiesBase):
         Refer to https://pytorch-geometric.readthedocs.io/en/latest/_modules/torch_geometric/nn/models/node2vec.html#Node2Vec
         for other parameters.
     """
+    class GCN(nn.Module):
+        def __init__(self, node_number, embedding_dim, meta_info, proposed):
+            super(EntitiesGCN.GCN, self).__init__()
+            self.embedding = torch.nn.Embedding(num_embeddings=node_number, embedding_dim=embedding_dim)
+            self.gcn1 = GCNConv(in_channels=embedding_dim, out_channels=64)
+            self.gcn2 = GCNConv(in_channels=64, out_channels=32)
+            self.gcn3 = GCNConv(in_channels=32, out_channels=16)
+            self.drop1 = torch.nn.Dropout()
+            self.drop2 = torch.nn.Dropout(p=0.1)
+            if proposed == True:
+                self.embedding.from_pretrained(meta_info, freeze=False)
+        
+        def forward(self, nodes, edges):
+            nodes_embedding = self.embedding(nodes)
+            nodes_embedding = self.gcn1(nodes_embedding, edges)
+            nodes_embedding = torch.relu(nodes_embedding)
+            nodes_embedding = self.drop1(nodes_embedding)
+            nodes_embedding = self.gcn2(nodes_embedding, edges)
+            nodes_embedding = torch.relu(nodes_embedding)
+            nodes_embedding = self.drop2(nodes_embedding)
+            nodes_embedding = self.gcn3(nodes_embedding, edges)
+            nodes_embedding = torch.relu(nodes_embedding)
+            return nodes_embedding
+
     def __init__(self, data, proposed=False, gnn_epoch=10, gnn_lr=0.01, multi=True, lr=0.001, node2vec_epoch=50, embedding_dim=128, 
             walk_length=20, context_size=10, walks_per_node=10, num_negative_samples=1, p=1, q=1, sparse=True, batch_size=128, 
             model_path="", visual=False):
@@ -128,7 +152,7 @@ class EntitiesGCN(EntitiesBase):
 
     def train(self):
         self.model.eval()
-        self.clf = GCN(node_number=self.data.num_nodes, embedding_dim=self.embedding_dim, proposed=self.proposed, meta_info=self.model())
+        self.clf = self.GCN(node_number=self.data.num_nodes, embedding_dim=self.embedding_dim, proposed=self.proposed, meta_info=self.model())
         self.clf.train()
         loss_fn = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.Adam(params=self.clf.parameters(), lr=self.gnn_lr)
@@ -139,7 +163,7 @@ class EntitiesGCN(EntitiesBase):
             f1_lst = list()
         for i in range(self.gnn_epoch):
             y_pred = self.clf(self.nodes, self.data.edge_index)
-            loss = loss_fn(y_pred[self.data.train_idx],self.data.train_y)
+            loss = loss_fn(y_pred[self.data.train_idx], self.data.train_y)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -202,8 +226,8 @@ class EntitiesGCN(EntitiesBase):
         if not self.multi:
             y_true_one_hot = np.zeros((y_true.size, y_true.max() + 1))
             y_true_one_hot[np.arange(y_true.size), y_true] = 1
-        recall = recall_score(y_true, y_pred, labels=np.unique(y_true), average="weighted")
-        f1 = f1_score(y_true, y_pred, labels=np.unique(y_true), average="weighted")
+        recall = recall_score(y_true, y_pred, labels=np.unique(y_true), average="macro")
+        f1 = f1_score(y_true, y_pred, labels=np.unique(y_true), average="macro")
         return acc, recall, f1
 
 def visualization(gcn_model, our_model):
@@ -213,17 +237,17 @@ def visualization(gcn_model, our_model):
         model.train()
         model.visual = False
         df = model.df
-        print(f"acc: {max(df.iloc[:, 1].tolist())}")
-        print(f"recall: {max(df.iloc[:, 2].tolist())}")
-        print(f"f1: {max(df.iloc[:, 3].tolist())}")
+        print(f"acc: {df.iloc[-1, 1]}")
+        print(f"recall: {df.iloc[-1, 2]}")
+        print(f"f1: {df.iloc[-1, 3]}")
         return df
     gcn_df = visual_train(gcn_model)
     our_df = visual_train(our_model)
     title = ["Train Loss", "Test Acc", "Test Recall", "Test F1"]
     time.sleep(5)
     for i in range(4):
-        plt.plot(list(range(1, 101)), gcn_df.iloc[:, i].tolist(), label="GCN")
-        plt.plot(list(range(1, 101)), our_df.iloc[:, i].tolist(), label="Proposed")
+        plt.plot(list(range(1, 51)), gcn_df.iloc[:, i].tolist(), label="GCN")
+        plt.plot(list(range(1, 51)), our_df.iloc[:, i].tolist(), label="Proposed")
         plt.title(title[i])
         plt.legend()
         plt.show()
@@ -234,10 +258,10 @@ if __name__ == "__main__":
     aifb_model.node2vec_save()
     aifb_model.tuning()
     aifb_model.main()
-    aifb_gcn_model = EntitiesGCN(aifb_data, node2vec_epoch=10, lr=0.1, embedding_dim=128, walk_length=30, p=0.25, q=0.25, batch_size=128, gnn_epoch=100, gnn_lr=0.01, proposed=False, model_path="../results/models/aifb.pt")
+    aifb_gcn_model = EntitiesGCN(aifb_data, node2vec_epoch=10, lr=0.1, embedding_dim=128, walk_length=30, p=0.25, q=0.25, batch_size=128, gnn_epoch=50, gnn_lr=0.01, proposed=False, model_path="../results/models/aifb.pt")
     aifb_gcn_model.tuning()
     aifb_gcn_model.main()
-    aifb_our_model = EntitiesGCN(aifb_data, node2vec_epoch=10, lr=0.1, embedding_dim=128, walk_length=30, p=0.25, q=0.25, batch_size=128, gnn_epoch=100, gnn_lr=0.01, proposed=True, model_path="../results/models/aifb.pt")
+    aifb_our_model = EntitiesGCN(aifb_data, node2vec_epoch=10, lr=0.1, embedding_dim=128, walk_length=30, p=0.25, q=0.25, batch_size=128, gnn_epoch=50, gnn_lr=0.01, proposed=True, model_path="../results/models/aifb.pt")
     aifb_our_model.tuning()
     aifb_our_model.main()
     visualization(aifb_gcn_model, aifb_our_model)
@@ -246,10 +270,10 @@ if __name__ == "__main__":
     mutag_model.node2vec_save()
     mutag_model.tuning()
     mutag_model.main()
-    mutag_gcn_model = EntitiesGCN(mutag_data, multi=False, node2vec_epoch=50, lr=0.01, embedding_dim=128, walk_length=20, p=0.5, q=0.25, batch_size=128, gnn_epoch=100, gnn_lr=0.01, proposed=False, model_path="../results/models/mutag.pt")
+    mutag_gcn_model = EntitiesGCN(mutag_data, multi=False, node2vec_epoch=20, lr=0.01, embedding_dim=128, walk_length=30, p=2, q=4, batch_size=64, gnn_epoch=50, gnn_lr=0.01, proposed=False, model_path="../results/models/mutag.pt")
     mutag_gcn_model.tuning()
     mutag_gcn_model.main()
-    mutag_our_model = EntitiesGCN(mutag_data, multi=False, node2vec_epoch=50, lr=0.01, embedding_dim=128, walk_length=20, p=0.5, q=0.25, batch_size=128, gnn_epoch=100, gnn_lr=0.01, proposed=True, model_path="../results/models/mutag.pt")
-    mutag_gcn_model.tuning()
-    mutag_gcn_model.main()
+    mutag_our_model = EntitiesGCN(mutag_data, multi=False, node2vec_epoch=20, lr=0.01, embedding_dim=128, walk_length=30, p=2, q=4, batch_size=64, gnn_epoch=50, gnn_lr=0.01, proposed=True, model_path="../results/models/mutag.pt")
+    mutag_our_model.tuning()
+    mutag_our_model.main()
     visualization(mutag_gcn_model, mutag_our_model)

@@ -80,28 +80,3 @@ class BaseModel(abc.ABC):
         print("Evaluating model...")
         acc, recall, f1 = self.test()
         print(f"Test Acc: {acc:.4f}, Test Recall: {recall:.4f}, Test F1: {f1:.4f}.")
-
-
-class GCN(nn.Module):
-    def __init__(self, node_number, embedding_dim, meta_info, proposed):
-        super(GCN, self).__init__()
-        self.embedding = torch.nn.Embedding(num_embeddings=node_number, embedding_dim=embedding_dim)
-        self.gcn1 = GCNConv(in_channels=embedding_dim, out_channels=64)
-        self.gcn2 = GCNConv(in_channels=64, out_channels=32)
-        self.gcn3 = GCNConv(in_channels=32, out_channels=16)
-        self.drop1 = torch.nn.Dropout()
-        self.drop2 = torch.nn.Dropout(p=0.1)
-        if proposed == True:
-            self.embedding.from_pretrained(meta_info, freeze=False)
-    
-    def forward(self, nodes, edges):
-        nodes_embedding = self.embedding(nodes)
-        nodes_embedding = self.gcn1(nodes_embedding, edges)
-        nodes_embedding = torch.relu(nodes_embedding)
-        nodes_embedding = self.drop1(nodes_embedding)
-        nodes_embedding = self.gcn2(nodes_embedding, edges)
-        nodes_embedding = torch.relu(nodes_embedding)
-        nodes_embedding = self.drop2(nodes_embedding)
-        nodes_embedding = self.gcn3(nodes_embedding, edges)
-        nodes_embedding = torch.relu(nodes_embedding)
-        return nodes_embedding

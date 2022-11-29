@@ -2,7 +2,8 @@
 data/*
 
 ## Results
-results/*
+results/*tuning/*
+results/models/*
 
 ## Tools
 tools.py
