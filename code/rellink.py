@@ -27,10 +27,13 @@ def create_datasets(rellink_data, edge_arr, node_arr):
 
 #create_datasets(rellink_data, edge_arr, node_arr)
 train_data = np.load(path + "train_data.npy")
+val_data = np.load(path + "valid_data.npy")
 test_data = np.load(path + "test_data.npy")
 train_graph = Data(x=torch.tensor(np.expand_dims(node_arr, axis=1)), edge_index=rellink_data.train_edge_index)
 
 
 if __name__ == "__main__":
-    rellink_model = LinkPred(train_graph, None, train_data, test_data, 1, epochs=5)
-    rellink_model.main()
+    rellink_model = LinkPred(train_graph, None, train_data, val_data, test_data, 1, node2vec_epoch=5)
+#   rellink_model.main()
+#   rellink_gcn_model = LinkPredGCN(train_graph, None, train_data, val_data, test_data, 1, proposed=False, gnn_epoch=10)
+#   rellink_gcn_model.main()

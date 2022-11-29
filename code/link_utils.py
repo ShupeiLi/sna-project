@@ -5,7 +5,7 @@ import random
 import numpy as np
 import networkx as nx
 from tqdm import tqdm
-from node2vec import *
+from base import *
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score
 import torch.nn as nn
@@ -85,24 +85,25 @@ class LinkPred(BaseModel):
         data: Training graph data.
         num_nodes: Number of nodes in the graph.
         train_data: Link training data.
+        val_data: Link validation data.
         test_data: Link test data.
         oper: Obtain edge features. 1 - average, 2 - hadamard, 3 - L1 norm, 4 - L2 norm.
         lr: Learning rate of optimizer. Default: 0.001.
-        epochs: The number of epochs of training. Default: 50.
+        node2vec_epoch: The number of epochs of training node2vec model. Default: 50.
         batch_size: The size of a single batch. Default: 128.
+        model_batch: Save model. Default: "".
         Refer to https://pytorch-geometric.readthedocs.io/en/latest/_modules/torch_geometric/nn/models/node2vec.html#Node2Vec
         for other parameters.
     """
-    def __init__(self, data, num_nodes, train_data, test_data, oper, gnn=True, use_metainfor=True, gnn_epoch=120,lr=0.001, epochs=50, embedding_dim=128, walk_length=20, context_size=10,
-            walks_per_node=10, num_negative_samples=1, p=1, q=1, sparse=True, batch_size=128):
+    def __init__(self, data, num_nodes, train_data, val_data, test_data, oper, lr=0.001, node2vec_epoch=50, embedding_dim=128, walk_length=20, context_size=10, walks_per_node=10, num_negative_samples=1, p=1, q=1, sparse=True, batch_size=128, model_path=""):
+        self.use_node2vec = True
+        self.model_path = model_path
         self.data = data
-        self.epochs = epochs
+        self.node2vec_epoch = node2vec_epoch
         self.train_data = train_data
+        self.val_data = val_data
         self.test_data = test_data
         self.oper = oper
-        self.gnn_epoch=gnn_epoch
-        self.gnn=gnn 
-        self.use_metainfor=use_metainfor
         self.num_nodes=num_nodes
         self.embedding_dim=embedding_dim
         self.preprocessing(num_nodes, lr, embedding_dim, walk_length, context_size, walks_per_node, 
@@ -120,38 +121,107 @@ class LinkPred(BaseModel):
         else:
             return (features1 - features2) ** 2
     
-    def down_stream_train(self):
+    def train(self):
+        self.model.eval()
+        self.z = self.model().detach().cpu().numpy()
+        train_node_arr = self.train_data[:, [0, 1]]
+        train_y = self.train_data[:, 2]
+        train_X = self._edge_features(self.z, train_node_arr, self.oper)
+        self.clf = LogisticRegression()
+        self.clf.fit(train_X, train_y)
+    
+    @torch.no_grad()
+    def test(self):
+        test_node_arr = self.test_data[:, [0, 1]]
+        y_true = self.test_data[:, 2]
+        test_X = self._edge_features(self.z, test_node_arr, self.oper)
+        y_pred = self.clf.predict_proba(test_X)[:, 1]
+        auc = roc_auc_score(y_true, y_pred)
+        return auc
+
+    @cal_time
+    def main(self):
+        if self.use_node2vec == True:
+            if os.path.exists(self.model_path):
+                self.model = torch.load(self.model_path)
+            else:
+                print("Training node2vec model...")
+                for epoch in tqdm(range(self.node2vec_epoch)):
+                    self.node2vec_train()
+        print("Training model for the task...")
+        self.train()
+        print("Evaluating model...")
+        auc = self.test()
+        print(f"Test Auc: {auc:.4f}")
+
+
+class LinkPredGCN(LinkPred):
+    """
+    Implement algorithms for link prediction task.
+    Args:
+        data: Training graph data.
+        num_nodes: Number of nodes in the graph.
+        train_data: Link training data.
+        val_data: Link validation data.
+        test_data: Link test data.
+        proposed: Use our method. Default: False.
+        gnn_epoch: The number of epochs of training GCN model. Default: 10.
+        gnn_lr: Learning rate of GCN. Default: 0.01.
+        oper: Obtain edge features. 1 - average, 2 - hadamard, 3 - L1 norm, 4 - L2 norm.
+        lr: Learning rate of optimizer. Default: 0.001.
+        node2vec_epoch: The number of epochs of training node2vec model. Default: 50.
+        batch_size: The size of a single batch. Default: 128.
+        model_path: Save model. Default: "".
+        visual: Prepare for visualization. Default: False.
+        Refer to https://pytorch-geometric.readthedocs.io/en/latest/_modules/torch_geometric/nn/models/node2vec.html#Node2Vec
+        for other parameters.
+    """
+    class GCN(nn.Module):
+        def __init__(self, node_number, embedding_dim, meta_info, proposed):
+            super(LinkPredGCN.GCN, self).__init__()
+            self.embedding = torch.nn.Embedding(num_embeddings=node_number, embedding_dim=embedding_dim)
+            self.gcn = GCNConv(in_channels=embedding_dim, out_channels=embedding_dim)
+            if proposed == True:
+                self.embedding.from_pretrained(meta_info, freeze=False)
+        
+        def forward(self, nodes, edges):
+            nodes_embedding = self.embedding(nodes)
+            nodes_embedding = self.gcn(nodes_embedding, edges)
+            return nodes_embedding
+
+    def __init__(self, data, num_nodes, train_data, val_data, test_data, oper, proposed=False, gnn_epoch=10, gnn_lr=0.01, visual=False, lr=0.001, node2vec_epoch=50, embedding_dim=128, walk_length=20, context_size=10, walks_per_node=10, num_negative_samples=1, p=1, q=1, sparse=True, batch_size=128, model_path=""):
+        super().__init__(data, num_nodes, train_data, val_data, test_data, oper, lr, node2vec_epoch, embedding_dim, walk_length, context_size, walks_per_node, num_negative_samples, p, q, sparse, batch_size, model_path)
+        self.proposed = proposed
+        self.gnn_epoch = gnn_epoch
+        self.gnn_lr = gnn_lr
+        self.visual = visual
+        if not proposed:
+            self.use_node2vec = False
+    
+    def train(self):
         self.model.eval()
         self.z = self.model().detach().cpu()
-
-        if self.gnn == False:
-            train_node_arr = self.train_data[:, [0, 1]]
-            train_y = self.train_data[:, 2]
-            train_X = self._edge_features(self.z, train_node_arr, self.oper)           
-            self.clf = LogisticRegression()
-            self.clf.fit(train_X, train_y)
-            
-        if self.gnn == True:
-            train_y = self.train_data[:, 2]
-            #shuffle = np.arange(len(train_y))
-            train_node_arr = self.train_data[:, [0, 1]]
-            #train_node_arr = train_node_arr[shuffle]                
-            train_y = torch.tensor(train_y,dtype=torch.float32)
-            #train_y = train_y[shuffle]
-            self.clf=GCN_Entity(nodes_number=self.num_nodes, embedding_dim=self.embedding_dim,use_metainfor=self.use_metainfor, metainfor=self.z)
-            self.clf.train()
-            loss_fn=torch.nn.BCELoss()
-            optimizer=torch.optim.Adam(params=self.clf.parameters(),lr=0.01)
-            for i in range(self.gnn_epoch):
-                y_pred = self.clf(self.data.x.reshape(-1,), self.data.edge_index)
-                y_pred = self._edge_features(y_pred, train_node_arr, oper=2)
-                y_pred = y_pred.mean(axis=1)
-                y_pred = nn.functional.sigmoid(y_pred)
-                loss=loss_fn(y_pred, train_y)
-                optimizer.zero_grad()
-                loss.backward()
-                optimizer.step()
-                print(f"GCN training loss: {loss.item():.3f}")
+        train_y = self.train_data[:, 2]
+        train_node_arr = self.train_data[:, [0, 1]]
+        train_y = torch.tensor(train_y, dtype=torch.float32)
+        if self.num_nodes is None:
+            num_nodes = self.model().shape[0]
+        else:
+            num_nodes = self.num_nodes
+        self.node_arr = torch.arange(num_nodes, dtype=int)
+        self.clf = LinkPredGCN.GCN(node_number=num_nodes, embedding_dim=self.embedding_dim, proposed=self.proposed, meta_info=self.z)
+        self.clf.train()
+        loss_fn = torch.nn.BCELoss()
+        optimizer = torch.optim.Adam(params=self.clf.parameters(), lr=self.gnn_lr)
+        for i in range(self.gnn_epoch):
+            y_pred = self.clf(self.node_arr, self.data.edge_index)
+            y_pred = self._edge_features(y_pred, train_node_arr, oper=2)
+            y_pred = y_pred.mean(axis=1)
+            y_pred = torch.sigmoid(y_pred)
+            loss = loss_fn(y_pred, train_y)
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
     
     @torch.no_grad()
     def test(self):
@@ -159,43 +229,9 @@ class LinkPred(BaseModel):
         test_X = self._edge_features(self.z, test_node_arr, self.oper)
         y_true = self.test_data[:, 2]  
         y_true = torch.tensor(y_true)
-        if self.gnn == False:
-            y_pred = self.clf.predict_proba(test_X)[:, 1]
-            auc = roc_auc_score(y_true, y_pred)
-            return auc
-        
-        if self.gnn == True:
-            y_pred = self.clf(self.data.x.reshape(-1,), self.data.edge_index)
-            y_pred = self._edge_features(y_pred, test_node_arr, oper=2)
-            y_pred = y_pred.mean(axis=1)
-            y_pred = nn.functional.sigmoid(y_pred)
-            y_pred[y_pred<0.5]=0
-            y_pred[y_pred>=0.5]=1
-            auc = roc_auc_score(y_true, y_pred)
-            #acc = (y_pred==y_true).sum()/len(y_pred)
-            return auc
-
-    @cal_time
-    def main(self):
-        if not hasattr(self, "epochs"):
-            raise AttributeError(f"Class attribute 'epochs' is not defined.")
-        for epoch in range(1, self.epochs + 1):
-            loss = self.train()
-        self.down_stream_train()
-        auc = self.test()
-        print(f"Test Auc: {auc:.4f}")
-
-
-class LinkGCN(nn.Module):
-    def __init__(self, nodes_number,embedding_dim, metainfor, use_metainfor):
-        super(LinkGCN, self).__init__()
-        self.embedding = torch.nn.Embedding(num_embeddings=nodes_number, embedding_dim=embedding_dim)
-        self.gcn = GCNConv(in_channels=embedding_dim, out_channels=embedding_dim)
-        if use_metainfor == True:
-            self.embedding.from_pretrained(metainfor, freeze=False)
-    
-    def forward(self, nodes, edges):
-        nodes_embedding = self.embedding(nodes)
-        nodes_embedding = self.gcn(nodes_embedding, edges)
-        #nodes_embedding=torch.relu(nodes_embedding)
-        return nodes_embedding
+        y_pred = self.clf(self.node_arr, self.data.edge_index)
+        y_pred = self._edge_features(y_pred, test_node_arr, self.oper)
+        y_pred = y_pred.mean(axis=1)
+        y_pred = torch.sigmoid(y_pred)
+        auc = roc_auc_score(y_true, y_pred)
+        return auc

@@ -79,7 +79,7 @@ class PubMed(BaseModel):
                 tune_config=tune.TuneConfig(
                     num_samples=20,
                     scheduler=ASHAScheduler(metric="mean_accuracy", mode="max")),
-                run_config=air.RunConfig(local_dir="../results", name="pubmed_node2vec_tuning")
+                    run_config=air.RunConfig(local_dir="../results", name="pubmed_node2vec_tuning")
                 )
         results = tuner.fit()
 
@@ -101,7 +101,6 @@ class PubMedGCN(PubMed):
         proposed: Use our method. Default: False.
         gnn_epoch: The number of epochs of training GCN model. Default: 10.
         gnn_lr: Learning rate of GCN. Default: 0.01.
-        multi: Multiclass classification or binary class classification. Default: True.
         lr: Learning rate of optimizer. Default: 0.001.
         node2vec_epoch: The number of epochs of training node2vec model. Default: 50.
         batch_size: The size of a single batch. Default: 128.

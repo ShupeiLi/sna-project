@@ -78,7 +78,7 @@ class EntitiesBase(BaseModel):
                 tune_config=tune.TuneConfig(
                     num_samples=20,
                     scheduler=ASHAScheduler(metric="mean_accuracy", mode="max")),
-                run_config=air.RunConfig(local_dir="../results", name="node2vec_tuning")
+                    run_config=air.RunConfig(local_dir="../results", name="node2vec_tuning")
                 )
         results = tuner.fit()
    
@@ -212,7 +212,7 @@ class EntitiesGCN(EntitiesBase):
                 tune_config=tune.TuneConfig(
                     num_samples=20,
                     scheduler=ASHAScheduler(metric="mean_accuracy", mode="max")),
-                run_config=air.RunConfig(local_dir="../results", name="gcn_tuning")
+                    run_config=air.RunConfig(local_dir="../results", name="gcn_tuning")
                 )
         results = tuner.fit()
 
