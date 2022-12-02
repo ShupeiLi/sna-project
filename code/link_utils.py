@@ -141,7 +141,7 @@ class LinkPred(BaseModel):
             self.preprocessing(self.num_nodes, config["lr"], config["embedding_dim"], config["walk_length"], 
                     self.context_size, self.walks_per_node, self.num_negative_samples, config["p"], config["q"], 
                     self.sparse, config["batch_size"])
-            for j in tqdm(range(config["node2vec_epoch"])):
+            for j in tqdm(range(10)):
                 self.node2vec_train()
             self.train()
             val_node_arr = self.val_data[:, [0, 1]]
@@ -153,19 +153,18 @@ class LinkPred(BaseModel):
 
         search_space = {
             "lr": tune.grid_search([0.001, 0.01, 0.1]),
-            "embedding_dim": tune.choice([64, 128, 256]),
+            "embedding_dim": tune.choice([64, 128]),
             "walk_length": tune.choice([10, 20, 30]),
             "p": tune.choice([0.25, 0.5, 1, 2, 4]),
             "q": tune.choice([0.25, 0.5, 1, 2, 4]),
-            "batch_size": tune.choice([64, 128, 256]),
-            "node2vec_epoch": tune.choice([10, 20])
+            "batch_size": tune.choice([64, 128]),
         }
 
         tuner = tune.Tuner( 
                 objective, 
                 param_space=search_space,
                 tune_config=tune.TuneConfig(
-                    num_samples=20,
+                    num_samples=10,
                     scheduler=ASHAScheduler(metric="mean_auc", mode="max")),
                     run_config=air.RunConfig(local_dir="../results", name=f"{info}_node2vec_tuning")
                 )
@@ -264,6 +263,34 @@ class LinkPredGCN(LinkPred):
             loss.backward()
             optimizer.step()
     
+    def gcn_tuning(self, lr, info):
+        self.gnn_lr = lr
+        if self.use_node2vec == True:
+            if os.path.exists(self.model_path):
+                self.model = torch.load(self.model_path)
+            else:
+                print("Training node2vec model...")
+                for epoch in tqdm(range(self.node2vec_epoch)):
+                    self.node2vec_train()
+        print("Training model for the task...")
+        self.train()
+
+        @torch.no_grad()
+        def evaluate():
+            print("Evaluating model...")
+            val_node_arr = self.val_data[:, [0, 1]]
+            val_X = self._edge_features(self.z, val_node_arr, self.oper)
+            y_true = self.val_data[:, 2]  
+            y_true = torch.tensor(y_true)
+            y_pred = self.clf(self.node_arr, self.data.edge_index)
+            y_pred = self._edge_features(y_pred, val_node_arr, self.oper)
+            y_pred = y_pred.mean(axis=1)
+            y_pred = torch.sigmoid(y_pred)
+            auc = roc_auc_score(y_true, y_pred)
+            print(f"{info}\nAUC: {auc}")
+
+        evaluate()
+
     @torch.no_grad()
     def test(self):
         test_node_arr = self.test_data[:, [0, 1]]
