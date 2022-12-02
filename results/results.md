@@ -31,15 +31,15 @@
 # Rellink
 ||node2vec|GCN|Proposed|
 |---|---|---|---|
-|average AUC|0.7875|||
+|average AUC|0.7875||0.9810|
 |hadamard AUC|0.8626|0.9816|0.9819|
-|L1 norm AUC|0.8304|||
-|L2 norm AUC|0.8276|||
+|L1 norm AUC|0.8304||0.9817|
+|L2 norm AUC|0.8276||0.9808|
 
 # Wordnet18rr
 ||node2vec|GCN|Proposed|
 |---|---|---|---|
-|average AUC|0.8567|0.7492|0.8382|
-|hadamard AUC|0.8327|||
-|L1 norm AUC|0.8454|||
-|L2 norm AUC||||
+|average AUC|0.8567||0.8929|
+|hadamard AUC|0.8327|0.8844|0.8897|
+|L1 norm AUC|0.8454||0.8911|
+|L2 norm AUC|0.8641||0.8971|
