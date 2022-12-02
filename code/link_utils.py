@@ -279,11 +279,11 @@ class LinkPredGCN(LinkPred):
         def evaluate():
             print("Evaluating model...")
             val_node_arr = self.val_data[:, [0, 1]]
-            val_X = self._edge_features(self.z, val_node_arr, self.oper)
+            val_X = self._edge_features(self.z, val_node_arr, 2)
             y_true = self.val_data[:, 2]  
             y_true = torch.tensor(y_true)
             y_pred = self.clf(self.node_arr, self.data.edge_index)
-            y_pred = self._edge_features(y_pred, val_node_arr, self.oper)
+            y_pred = self._edge_features(y_pred, val_node_arr, 2)
             y_pred = y_pred.mean(axis=1)
             y_pred = torch.sigmoid(y_pred)
             auc = roc_auc_score(y_true, y_pred)
@@ -294,11 +294,11 @@ class LinkPredGCN(LinkPred):
     @torch.no_grad()
     def test(self):
         test_node_arr = self.test_data[:, [0, 1]]
-        test_X = self._edge_features(self.z, test_node_arr, self.oper)
+        test_X = self._edge_features(self.z, test_node_arr, 2)
         y_true = self.test_data[:, 2]  
         y_true = torch.tensor(y_true)
         y_pred = self.clf(self.node_arr, self.data.edge_index)
-        y_pred = self._edge_features(y_pred, test_node_arr, self.oper)
+        y_pred = self._edge_features(y_pred, test_node_arr, 2)
         y_pred = y_pred.mean(axis=1)
         y_pred = torch.sigmoid(y_pred)
         auc = roc_auc_score(y_true, y_pred)
