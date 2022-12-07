@@ -10,6 +10,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score
 import torch.nn as nn
 from torch_geometric.nn import GCNConv
+from ray import tune, air
+from ray.tune.schedulers import ASHAScheduler
 
 
 def not_connected_store(path, edge_arr, node_arr):
@@ -100,6 +102,10 @@ class LinkPred(BaseModel):
         self.model_path = model_path
         self.data = data
         self.node2vec_epoch = node2vec_epoch
+        self.context_size = context_size
+        self.walks_per_node = walks_per_node
+        self.num_negative_samples = num_negative_samples
+        self.sparse = sparse
         self.train_data = train_data
         self.val_data = val_data
         self.test_data = test_data
@@ -130,6 +136,40 @@ class LinkPred(BaseModel):
         self.clf = LogisticRegression()
         self.clf.fit(train_X, train_y)
     
+    def tuning(self, info=""):
+        def objective(config):
+            self.preprocessing(self.num_nodes, config["lr"], config["embedding_dim"], config["walk_length"], 
+                    self.context_size, self.walks_per_node, self.num_negative_samples, config["p"], config["q"], 
+                    self.sparse, config["batch_size"])
+            for j in tqdm(range(10)):
+                self.node2vec_train()
+            self.train()
+            val_node_arr = self.val_data[:, [0, 1]]
+            y_true = self.val_data[:, 2]
+            val_X = self._edge_features(self.z, val_node_arr, self.oper)
+            y_pred = self.clf.predict_proba(val_X)[:, 1]
+            auc = roc_auc_score(y_true, y_pred)
+            tune.report(mean_auc=auc)
+
+        search_space = {
+            "lr": tune.grid_search([0.001, 0.01, 0.1]),
+            "embedding_dim": tune.choice([64, 128]),
+            "walk_length": tune.choice([10, 20, 30]),
+            "p": tune.choice([0.25, 0.5, 1, 2, 4]),
+            "q": tune.choice([0.25, 0.5, 1, 2, 4]),
+            "batch_size": tune.choice([64, 128]),
+        }
+
+        tuner = tune.Tuner( 
+                objective, 
+                param_space=search_space,
+                tune_config=tune.TuneConfig(
+                    num_samples=10,
+                    scheduler=ASHAScheduler(metric="mean_auc", mode="max")),
+                    run_config=air.RunConfig(local_dir="../results", name=f"{info}_node2vec_tuning")
+                )
+        results = tuner.fit()
+
     @torch.no_grad()
     def test(self):
         test_node_arr = self.test_data[:, [0, 1]]
@@ -223,14 +263,42 @@ class LinkPredGCN(LinkPred):
             loss.backward()
             optimizer.step()
     
+    def gcn_tuning(self, lr, info):
+        self.gnn_lr = lr
+        if self.use_node2vec == True:
+            if os.path.exists(self.model_path):
+                self.model = torch.load(self.model_path)
+            else:
+                print("Training node2vec model...")
+                for epoch in tqdm(range(self.node2vec_epoch)):
+                    self.node2vec_train()
+        print("Training model for the task...")
+        self.train()
+
+        @torch.no_grad()
+        def evaluate():
+            print("Evaluating model...")
+            val_node_arr = self.val_data[:, [0, 1]]
+            val_X = self._edge_features(self.z, val_node_arr, 2)
+            y_true = self.val_data[:, 2]  
+            y_true = torch.tensor(y_true)
+            y_pred = self.clf(self.node_arr, self.data.edge_index)
+            y_pred = self._edge_features(y_pred, val_node_arr, 2)
+            y_pred = y_pred.mean(axis=1)
+            y_pred = torch.sigmoid(y_pred)
+            auc = roc_auc_score(y_true, y_pred)
+            print(f"{info}\nAUC: {auc}")
+
+        evaluate()
+
     @torch.no_grad()
     def test(self):
         test_node_arr = self.test_data[:, [0, 1]]
-        test_X = self._edge_features(self.z, test_node_arr, self.oper)
+        test_X = self._edge_features(self.z, test_node_arr, 2)
         y_true = self.test_data[:, 2]  
         y_true = torch.tensor(y_true)
         y_pred = self.clf(self.node_arr, self.data.edge_index)
-        y_pred = self._edge_features(y_pred, test_node_arr, self.oper)
+        y_pred = self._edge_features(y_pred, test_node_arr, 2)
         y_pred = y_pred.mean(axis=1)
         y_pred = torch.sigmoid(y_pred)
         auc = roc_auc_score(y_true, y_pred)
